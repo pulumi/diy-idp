@@ -1,0 +1,21 @@
+FROM --platform=linux/amd64 cgr.dev/chainguard/go:latest AS build
+
+WORKDIR /app
+
+COPY backend/go.mod backend/go.sum ./
+
+RUN go mod download
+
+COPY backend/ .
+
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o main .
+
+FROM --platform=linux/amd64 cgr.dev/chainguard/wolfi-base
+
+RUN apk update && apk add ca-certificates sqlite
+
+COPY --from=build /app/main /usr/bin/
+
+EXPOSE 3000
+
+ENTRYPOINT ["/usr/bin/main"]
