@@ -468,7 +468,7 @@ const genericUiSchema: UiSchema = {
     "scale": {
         "ui:widget": "CheckboxesWidget",
     },
-    "workflow": {
+    "workload": {
         "ui:widget": "DefaultValueOverrideWidget",
     },
     "registryPath": {
@@ -524,7 +524,7 @@ export default function TailwindThemedForm({schema, uiSchema, ...props}) {
 
     return (
         <div
-            className="m-4 bg-white-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm p-3">
+            className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 m-4 bg-white-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 bg-white shadow-sm p-3">
             <Form
                 schema={schema}
                 uiSchema={uiSchema}

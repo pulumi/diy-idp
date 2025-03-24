@@ -10,7 +10,7 @@ type Service struct {
 	PulumiService    *PulumiService
 	BlueprintService *BlueprintService
 	GitHubService    *GitHubService
-	WorkflowService  *WorkflowService
+	WorkloadService  *WorkloadService
 }
 
 // NewService creates a new service instance with all services
@@ -18,17 +18,17 @@ func NewService(_ *repository.Repository, cfg *config.Config) *Service {
 	pulumiService := NewPulumiService(cfg)
 	blueprintService := NewBlueprintService(cfg)
 	githubService := NewGitHubService(cfg)
-	workflowService := NewWorkflowService(cfg)
+	workloadService := NewWorkloadService(cfg)
 
 	// Set dependencies
-	workflowService.SetPulumiService(pulumiService)
-	workflowService.SetBlueprintService(blueprintService)
-	workflowService.SetGitHubService(githubService)
+	workloadService.SetPulumiService(pulumiService)
+	workloadService.SetBlueprintService(blueprintService)
+	workloadService.SetGitHubService(githubService)
 
 	return &Service{
 		PulumiService:    pulumiService,
 		BlueprintService: blueprintService,
 		GitHubService:    githubService,
-		WorkflowService:  workflowService,
+		WorkloadService:  workloadService,
 	}
 }

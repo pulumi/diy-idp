@@ -201,13 +201,13 @@ export default function Header() {
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/workflows"
-                                      className={getLinkClassName("/workflows")}
-                                      aria-current={isActiveRoute("/workflows") ? "page" : undefined}
+                                <Link to="/workloads"
+                                      className={getLinkClassName("/workloads")}
+                                      aria-current={isActiveRoute("/workloads") ? "page" : undefined}
                                 >
                                     <BoxIcon size={24}
-                                             className={isActiveRoute("/workflows") ? "text-primary-600 dark:text-primary-400" : ""}/>
-                                    <span className="ms-3">Workflows</span>
+                                             className={isActiveRoute("/workloads") ? "text-primary-600 dark:text-primary-400" : ""}/>
+                                    <span className="ms-3">Workloads</span>
                                 </Link>
                             </li>
                             <li>

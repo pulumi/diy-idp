@@ -16,7 +16,7 @@ type Stack = {
     result: string;
     tags?: {
         "idp:projectid"?: string;
-        "idp:workflow"?: string;
+        "idp:workload"?: string;
         [key: string]: string | undefined;
     };
     version?: number;
@@ -27,7 +27,7 @@ type StacksResponse = {
     continuationToken?: string;
 }
 
-export default function ListWorkflows() {
+export default function ListWorkloads() {
     const [stacks, setStacks] = useState([] as Stack[]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -50,7 +50,7 @@ export default function ListWorkflows() {
 
         const queryString = params.toString() ? `?${params.toString()}` : '';
 
-        fetch(`${API_URL}api/workflows${queryString}`)
+        fetch(`${API_URL}api/workloads${queryString}`)
             .then(res => res.json())
             .then((data: StacksResponse) => {
                 setStacks(data.stacks);
@@ -82,7 +82,7 @@ export default function ListWorkflows() {
         setLoading(true);
         const API_URL = import.meta.env.MODE === 'production' ? import.meta.env.VITE_API_URL : '';
 
-        fetch(`${API_URL}api/workflows/${selectedStack.orgName}/${selectedStack.projectName}/${selectedStack.stackName}`, {
+        fetch(`${API_URL}api/workloads/${selectedStack.orgName}/${selectedStack.projectName}/${selectedStack.stackName}`, {
             method: 'DELETE',
         })
             .then(res => {
@@ -142,7 +142,7 @@ export default function ListWorkflows() {
                 <div className="mb-8 justify-between items-center max-w-auto">
                     <Banner
                         title={auth.isAuthenticated ? `Hi ${auth.user?.profile.name}!` : 'Welcome Anonymous'}
-                        body={'Manage your workflows here'}
+                        body={'Manage your workloads here'}
                     />
                 </div>
                 {/* Filter controls */}
@@ -226,10 +226,10 @@ export default function ListWorkflows() {
                                         </div>
                                         <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                                             <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">Delete
-                                                Workflow</h3>
+                                                Workload</h3>
                                             <div className="mt-2">
                                                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                                                    Are you sure you want to delete the workflow <span
+                                                    Are you sure you want to delete the workload <span
                                                     className="font-semibold">{selectedStack?.stackName}</span> in
                                                     project <span
                                                     className="font-semibold">{selectedStack?.projectName}</span>? This
@@ -348,7 +348,7 @@ export default function ListWorkflows() {
                                                 className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    navigate(`/workflows/${stack.orgName}/${stack.projectName}/${stack.stackName}`);
+                                                    navigate(`/workloads/${stack.orgName}/${stack.projectName}/${stack.stackName}`);
                                                 }}
                                             >
                                                 Details
@@ -361,7 +361,7 @@ export default function ListWorkflows() {
 
                         {stacks.length === 0 && (
                             <div className="px-6 py-12 text-center bg-white dark:bg-gray-800 rounded-md">
-                                <p className="text-gray-500 dark:text-gray-400 text-sm">No workflows found.</p>
+                                <p className="text-gray-500 dark:text-gray-400 text-sm">No workloads found.</p>
                             </div>
                         )}
                     </div>
@@ -384,7 +384,7 @@ export default function ListWorkflows() {
                         }`}
                     >
                         <Trash2 className="h-4 w-4 mr-2"/>
-                        Delete Workflow
+                        Delete Workload
                     </button>
 
                     <button
@@ -393,7 +393,7 @@ export default function ListWorkflows() {
                         className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800"
                     >
                         <Plus className="h-4 w-4 mr-2"/>
-                        Create New Workflow
+                        Create New Workload
                     </button>
                 </div>
             </div>
@@ -401,7 +401,7 @@ export default function ListWorkflows() {
     );
 };
 
-export function CreateWorkflow() {
+export function CreateWorkload() {
     const {blueprintName} = useParams();
     const [schema, setSchema] = useState(null);
     const [uiSchema, setUiSchema] = useState(null);
@@ -418,7 +418,7 @@ export function CreateWorkflow() {
             .then(res => res.json());
 
 
-        const fetchMetadata = fetch(`/api/workflows/schema`)
+        const fetchMetadata = fetch(`/api/workloads/schema`)
             .then(res => res.json());
 
 
@@ -493,7 +493,7 @@ export function CreateWorkflow() {
     }, [blueprintName]);
 
     const handleSubmit = ({formData}) => {
-        fetch('/api/workflows', {
+        fetch('/api/workloads', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -505,7 +505,7 @@ export function CreateWorkflow() {
         })
             .then(res => res.json())
             .then(() => {
-                navigate('/workflows');
+                navigate('/workloads');
             })
             .catch(err => console.error('Error creating item:', err));
     };

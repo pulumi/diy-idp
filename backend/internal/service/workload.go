@@ -19,7 +19,7 @@ import (
 )
 
 // BlueprintService implements BlueprintServiceInterface
-type WorkflowService struct {
+type WorkloadService struct {
 	cfg              *config.Config
 	httpClient       *http.Client
 	pulumiService    *PulumiService
@@ -28,8 +28,8 @@ type WorkflowService struct {
 }
 
 // NewBlueprintService creates a new BlueprintService instance
-func NewWorkflowService(cfg *config.Config) *WorkflowService {
-	return &WorkflowService{
+func NewWorkloadService(cfg *config.Config) *WorkloadService {
+	return &WorkloadService{
 		cfg: cfg,
 		httpClient: &http.Client{
 			Timeout: 30 * time.Second,
@@ -37,15 +37,15 @@ func NewWorkflowService(cfg *config.Config) *WorkflowService {
 	}
 }
 
-func (s *WorkflowService) SetPulumiService(service *PulumiService) {
+func (s *WorkloadService) SetPulumiService(service *PulumiService) {
 	s.pulumiService = service
 }
 
-func (s *WorkflowService) SetBlueprintService(service *BlueprintService) {
+func (s *WorkloadService) SetBlueprintService(service *BlueprintService) {
 	s.blueprintService = service
 }
 
-func (s *WorkflowService) SetGitHubService(service *GitHubService) {
+func (s *WorkloadService) SetGitHubService(service *GitHubService) {
 	s.githubService = service
 }
 
@@ -78,8 +78,8 @@ func teamsToOneOfSchema(teams []model.Team) []map[string]interface{} {
 	return oneOfOptions
 }
 
-// convertWorkflowToJSONSchema converts workflow property overrides to a JSON schema
-func (s *WorkflowService) convertWorkflowToJSONSchema(overrides []model.WorkflowPropertyOverride) map[string]interface{} {
+// convertWorkloadToJSONSchema converts workload property overrides to a JSON schema
+func (s *WorkloadService) convertWorkloadToJSONSchema(overrides []model.WorkloadPropertyOverride) map[string]interface{} {
 	properties := make(map[string]interface{})
 	var required []string
 
@@ -173,8 +173,8 @@ func (s *WorkflowService) convertWorkflowToJSONSchema(overrides []model.Workflow
 	}
 }
 
-// GetWorkflowSchema retrieves the JSON schema for workflows
-func (s *WorkflowService) GetWorkflowSchema(c echo.Context) (map[string]interface{}, error) {
+// GetWorkloadSchema retrieves the JSON schema for workloads
+func (s *WorkloadService) GetWorkloadSchema(c echo.Context) (map[string]interface{}, error) {
 	configuration := esc.NewConfiguration()
 	escClient := esc.NewClient(configuration)
 	authCtx := esc.NewAuthContext(s.cfg.Pulumi.APIToken)
@@ -188,17 +188,17 @@ func (s *WorkflowService) GetWorkflowSchema(c echo.Context) (map[string]interfac
 		return nil, fmt.Errorf("failed to open environment: %w", err)
 	}
 
-	escBlueprint, ok := values["workflow"]
+	escBlueprint, ok := values["workload"]
 	if !ok {
-		c.Logger().Debugf("Secret 'workflow' not found in environment %s/%s", projName, envName)
-		return nil, fmt.Errorf("secret 'workflow' not found in environment %s/%s", projName, envName)
+		c.Logger().Debugf("Secret 'workload' not found in environment %s/%s", projName, envName)
+		return nil, fmt.Errorf("secret 'workload' not found in environment %s/%s", projName, envName)
 	}
 
-	var ws = model.Workflow{}
+	var ws = model.Workload{}
 
 	if overrides, ok := escBlueprint.(map[string]interface{})["properties"].([]map[string]string); ok {
 		for _, o := range overrides {
-			ws.WorkflowPropertyOverrides = append(ws.WorkflowPropertyOverrides, model.WorkflowPropertyOverride{
+			ws.WorkloadPropertyOverrides = append(ws.WorkloadPropertyOverrides, model.WorkloadPropertyOverride{
 				Name:     o["name"],
 				Type:     o["type"],
 				Title:    o["title"],
@@ -208,7 +208,7 @@ func (s *WorkflowService) GetWorkflowSchema(c echo.Context) (map[string]interfac
 	} else if overrides, ok := escBlueprint.(map[string]interface{})["properties"].([]interface{}); ok {
 		for _, o := range overrides {
 			override := o.(map[string]interface{})
-			po := model.WorkflowPropertyOverride{
+			po := model.WorkloadPropertyOverride{
 				Name: override["name"].(string),
 				Type: override["type"].(string),
 			}
@@ -220,23 +220,23 @@ func (s *WorkflowService) GetWorkflowSchema(c echo.Context) (map[string]interfac
 			if title, ok := override["title"]; ok {
 				po.Title = title.(string)
 			}
-			ws.WorkflowPropertyOverrides = append(ws.WorkflowPropertyOverrides, po)
+			ws.WorkloadPropertyOverrides = append(ws.WorkloadPropertyOverrides, po)
 		}
 	}
 
-	schema := s.convertWorkflowToJSONSchema(ws.WorkflowPropertyOverrides)
+	schema := s.convertWorkloadToJSONSchema(ws.WorkloadPropertyOverrides)
 	return schema, nil
 }
 
-// GetWorkflows retrieves all workflows
-func (s *WorkflowService) GetWorkflows(c echo.Context, workflow, projectID string) (*model.ListStacksResponse, error) {
+// GetWorkloads retrieves all workloads
+func (s *WorkloadService) GetWorkloads(c echo.Context, workload, projectID string) (*model.ListStacksResponse, error) {
 	options := &model.ListStacksOptions{
 		Organization: s.cfg.Pulumi.Organization,
-		TagName:      "idp:workflow",
+		TagName:      "idp:workload",
 	}
 
-	if workflow != "" {
-		options.TagValue = workflow
+	if workload != "" {
+		options.TagValue = workload
 	}
 
 	if projectID != "" {
@@ -276,8 +276,8 @@ func (s *WorkflowService) GetWorkflows(c echo.Context, workflow, projectID strin
 	return stacks, nil
 }
 
-// DeleteWorkflow deletes a workflow
-func (s *WorkflowService) DeleteWorkflow(organization, project, stack string) error {
+// DeleteWorkload deletes a workload
+func (s *WorkloadService) DeleteWorkload(organization, project, stack string) error {
 	if organization == "" {
 		return fmt.Errorf("organization is required")
 	}
@@ -307,8 +307,8 @@ func (s *WorkflowService) DeleteWorkflow(organization, project, stack string) er
 	return nil
 }
 
-// UpdateWorkflow updates a workflow
-func (s *WorkflowService) UpdateWorkflow(organization, project, stack string, req *model.WorkflowRequest) error {
+// UpdateWorkload updates a workload
+func (s *WorkloadService) UpdateWorkload(organization, project, stack string, req *model.WorkloadRequest) error {
 	if organization == "" {
 		return fmt.Errorf("organization is required")
 	}
@@ -327,8 +327,8 @@ func (s *WorkflowService) UpdateWorkflow(organization, project, stack string, re
 	return nil
 }
 
-// CreateWorkflow creates a new workflow
-func (s *WorkflowService) CreateWorkflow(ctx context.Context, req *model.WorkflowRequest) (*model.RepoCreationResponse, error) {
+// CreateWorkload creates a new workload
+func (s *WorkloadService) CreateWorkload(ctx context.Context, req *model.WorkloadRequest) (*model.RepoCreationResponse, error) {
 	if req.Name == "" {
 		return nil, fmt.Errorf("repository name is required")
 	}
@@ -354,9 +354,9 @@ func (s *WorkflowService) CreateWorkflow(ctx context.Context, req *model.Workflo
 		return nil, fmt.Errorf("failed to grant stack access to team: %w", err)
 	}
 
-	// Set workflow name as stack tag
+	// Set workload name as stack tag
 	err = s.pulumiService.SetStackTag(s.cfg.Pulumi.Organization, req.Blueprint, name, model.Tag{
-		Key:   "idp:workflow",
+		Key:   "idp:workload",
 		Value: req.Name,
 	})
 
@@ -445,8 +445,8 @@ func (s *WorkflowService) CreateWorkflow(ctx context.Context, req *model.Workflo
 	}
 }
 
-// GetWorkflowDetails retrieves detailed information about a workflow
-func (s *WorkflowService) GetWorkflowDetails(organization, project, stack string) (*model.WorkflowResponse, error) {
+// GetWorkloadDetails retrieves detailed information about a workload
+func (s *WorkloadService) GetWorkloadDetails(organization, project, stack string) (*model.WorkloadResponse, error) {
 	configuration := esc.NewConfiguration()
 	escClient := esc.NewClient(configuration)
 	authCtx := esc.NewAuthContext(s.cfg.Pulumi.APIToken)
@@ -470,7 +470,7 @@ func (s *WorkflowService) GetWorkflowDetails(organization, project, stack string
 
 	options := &model.ListStacksOptions{
 		Organization: s.cfg.Pulumi.Organization,
-		TagName:      "idp:workflow",
+		TagName:      "idp:workload",
 		TagValue:     stack,
 	}
 
@@ -480,7 +480,7 @@ func (s *WorkflowService) GetWorkflowDetails(organization, project, stack string
 	}
 
 	if len(stacks.Stacks) == 0 {
-		return nil, fmt.Errorf("no stacks found for workflow %s", stack)
+		return nil, fmt.Errorf("no stacks found for workload %s", stack)
 	}
 
 	for i := range stacks.Stacks {
@@ -510,7 +510,7 @@ func (s *WorkflowService) GetWorkflowDetails(organization, project, stack string
 		stacks.Stacks[i].Tags = stackHandler.Tags
 	}
 
-	return &model.WorkflowResponse{
+	return &model.WorkloadResponse{
 		Name:          stack,
 		Blueprint:     project,
 		BlueprintName: project,
@@ -524,7 +524,7 @@ func (s *WorkflowService) GetWorkflowDetails(organization, project, stack string
 }
 
 // GetDeploymentLogs retrieves logs for a deployment
-func (s *WorkflowService) GetDeploymentLogs(organization, project, stack, deploymentID, continuationToken string) (*model.LogResponse, error) {
+func (s *WorkloadService) GetDeploymentLogs(organization, project, stack, deploymentID, continuationToken string) (*model.LogResponse, error) {
 	// Construct the URL for the Pulumi API
 	url := fmt.Sprintf("%s/stacks/%s/%s/%s/deployments/%s/logs",
 		s.cfg.Pulumi.APIBaseURL, organization, project, stack, deploymentID)

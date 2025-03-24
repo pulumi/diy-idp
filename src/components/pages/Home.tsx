@@ -14,7 +14,7 @@ type Project = {
     language: string;
     cloudProvider: string;
     lastDeployed: string;
-    workflow: string;
+    workload: string;
     metrics?: {
         deploymentFrequency: any;
         leadTime: any;
@@ -99,7 +99,7 @@ function ProjectsTable({onSelectProject, selectedProjectId}: ProjectsTableProps)
             language: 'typescript',
             cloudProvider: 'aws',
             lastDeployed: '12 minutes ago',
-            workflow: 'Frontend',
+            workload: 'Frontend',
             metrics: generateMetricsForProject('1')
         },
         {
@@ -109,7 +109,7 @@ function ProjectsTable({onSelectProject, selectedProjectId}: ProjectsTableProps)
             language: 'java',
             cloudProvider: 'azure',
             lastDeployed: '2 hours ago',
-            workflow: 'Backend',
+            workload: 'Backend',
             metrics: generateMetricsForProject('2')
         },
         {
@@ -119,7 +119,7 @@ function ProjectsTable({onSelectProject, selectedProjectId}: ProjectsTableProps)
             language: 'python',
             cloudProvider: 'gcp',
             lastDeployed: '1 day ago',
-            workflow: 'Data',
+            workload: 'Data',
             metrics: generateMetricsForProject('3')
         },
         {
@@ -129,7 +129,7 @@ function ProjectsTable({onSelectProject, selectedProjectId}: ProjectsTableProps)
             language: 'go',
             cloudProvider: 'aws',
             lastDeployed: '3 days ago',
-            workflow: 'Mobile',
+            workload: 'Mobile',
             metrics: generateMetricsForProject('4')
         },
         {
@@ -139,7 +139,7 @@ function ProjectsTable({onSelectProject, selectedProjectId}: ProjectsTableProps)
             language: 'csharp',
             cloudProvider: 'azure',
             lastDeployed: '4 hours ago',
-            workflow: 'Infrastructure',
+            workload: 'Infrastructure',
             metrics: generateMetricsForProject('5')
         },
         {
@@ -149,7 +149,7 @@ function ProjectsTable({onSelectProject, selectedProjectId}: ProjectsTableProps)
             language: 'javascript',
             cloudProvider: 'aws',
             lastDeployed: '30 minutes ago',
-            workflow: 'Backend',
+            workload: 'Backend',
             metrics: generateMetricsForProject('6')
         }
     ];
@@ -209,7 +209,7 @@ function ProjectsTable({onSelectProject, selectedProjectId}: ProjectsTableProps)
             <div className="bg-white dark:bg-gray-800 shadow-md">
                 <div
                     className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
-                    <h2 className="font-semibold text-xl text-gray-800 dark:text-gray-200">Active Workflows</h2>
+                    <h2 className="font-semibold text-xl text-gray-800 dark:text-gray-200">Active Workloads</h2>
                     <button className="text-blue-500 hover:text-blue-700 dark:hover:text-blue-300">View All</button>
                 </div>
 
@@ -219,7 +219,7 @@ function ProjectsTable({onSelectProject, selectedProjectId}: ProjectsTableProps)
                         <tr className="bg-gray-50 dark:bg-gray-700">
                             <th className="px-4 py-2 border-r border-gray-200 dark:border-gray-600 dark:text-gray-300"></th>
                             <th className="px-4 py-2 border-r border-gray-200 dark:border-gray-600 dark:text-gray-300">Project</th>
-                            <th className="px-4 py-2 border-r border-gray-200 dark:border-gray-600 dark:text-gray-300">Workflow</th>
+                            <th className="px-4 py-2 border-r border-gray-200 dark:border-gray-600 dark:text-gray-300">Workload</th>
                             <th className="px-4 py-2 border-r border-gray-200 dark:border-gray-600 dark:text-gray-300">Language</th>
                             <th className="px-4 py-2 border-r border-gray-200 dark:border-gray-600 dark:text-gray-300">Cloud
                                 Provider
@@ -243,7 +243,7 @@ function ProjectsTable({onSelectProject, selectedProjectId}: ProjectsTableProps)
                                     {project.name}
                                 </td>
                                 <td className="border border-l-0 border-gray-200 dark:border-gray-600 px-4 py-2">
-                                    {project.workflow}
+                                    {project.workload}
                                 </td>
                                 <td className="border border-l-0 border-gray-200 dark:border-gray-600 px-4 py-2">
                                     <div className="flex items-center">

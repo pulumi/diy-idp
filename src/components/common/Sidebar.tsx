@@ -4,7 +4,7 @@ import {IconName} from "lucide-react/dynamic";
 
 const navigationItems = [
     {name: 'Home', href: '/', icon: "home"},
-    {name: 'Workflows', href: '/workflows', icon: "box"},
+    {name: 'Workloads', href: '/workloads', icon: "box"},
     {name: 'Blueprints', href: '/blueprints', icon: "map"},
 ];
 

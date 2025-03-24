@@ -13,16 +13,16 @@ func (h *Handler) Register(v1 *echo.Group) {
 	blueprint.GET("/:name/schema", h.GetBlueprintSchema)
 	blueprint.GET("/:name/ui-schema", h.GetBlueprintUISchema)
 
-	workflow := v1.Group("/workflows")
-	workflow.GET("/schema", h.GetWorkflowSchema)
-	workflow.POST("", h.CreateWorkflow)
-	workflow.PUT("/:organization/:project/:stack", h.UpdateWorkflow)
-	workflow.DELETE("/:organization/:project/:stack", h.DeleteWorkflow)
-	workflow.GET("", h.GetWorkflows)
-	workflow.GET("/:organization/:project/:stack", h.GetWorkflowDetails)
+	workload := v1.Group("/workloads")
+	workload.GET("/schema", h.GetWorkloadSchema)
+	workload.POST("", h.CreateWorkload)
+	workload.PUT("/:organization/:project/:stack", h.UpdateWorkload)
+	workload.DELETE("/:organization/:project/:stack", h.DeleteWorkload)
+	workload.GET("", h.GetWorkloads)
+	workload.GET("/:organization/:project/:stack", h.GetWorkloadDetails)
 
-	workflow.GET("/:organization/:project/:stack/deployments/:deploymentID/logs", h.GetDeploymentLogs)
+	workload.GET("/:organization/:project/:stack/deployments/:deploymentID/logs", h.GetDeploymentLogs)
 
 	// WebSocket endpoint for streaming logs
-	workflow.GET("/ws/:organization/:project/:stack/deployments/:deploymentID/logs", h.StreamDeploymentLogsWS)
+	workload.GET("/ws/:organization/:project/:stack/deployments/:deploymentID/logs", h.StreamDeploymentLogsWS)
 }

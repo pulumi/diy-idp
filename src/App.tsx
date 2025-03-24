@@ -9,8 +9,8 @@ import ProfileCard from "./components/common/ProfileCard.tsx";
 import BlueprintGrid from "./components/pages/Blueprints.tsx";
 
 import DynamicSelectForm from "./components/pages/Home.tsx";
-import ListWorkflows, {CreateWorkflow} from "./components/pages/Workflow.tsx";
-import WorkflowDetail from "./components/pages/WorkflowDetail.tsx";
+import ListWorkloads, {CreateWorkload} from "./components/pages/Workload.tsx";
+import WorkloadDetail from "./components/pages/WorkloadDetail.tsx";
 
 const oidcConfig = {
     authority: "https://github.com/login/oauth/authorize",
@@ -48,11 +48,11 @@ function App() {
                                 <ProtectedRoute>
                                     <Routes>
                                         <Route path="profile" element={<ProfileCard/>}/>
-                                        <Route path="workflows/*" element={
+                                        <Route path="workloads/*" element={
                                             <Routes>
-                                                <Route path="create/:blueprintName" element={<CreateWorkflow/>}/>
-                                                <Route path="" element={<ListWorkflows/>}/>
-                                                <Route path="/:organization/:blueprintName/:name" element={<WorkflowDetail />} />
+                                                <Route path="create/:blueprintName" element={<CreateWorkload/>}/>
+                                                <Route path="" element={<ListWorkloads/>}/>
+                                                <Route path="/:organization/:blueprintName/:name" element={<WorkloadDetail />} />
                                             </Routes>
                                         }/>
                                     </Routes>

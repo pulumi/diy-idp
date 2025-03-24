@@ -37,7 +37,7 @@ export default function DeploymentLogsTerminal({organization, project, stack, de
             setLogs([]);
 
 
-            const wsUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/api/workflows/ws/${organization}/${project}/${stack}/deployments/${deploymentID}/logs`;
+            const wsUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/api/workloads/ws/${organization}/${project}/${stack}/deployments/${deploymentID}/logs`;
 
             const socket = new WebSocket(wsUrl);
             wsRef.current = socket;
@@ -99,7 +99,7 @@ export default function DeploymentLogsTerminal({organization, project, stack, de
             const API_URL = import.meta.env.MODE === 'production' ? import.meta.env.VITE_API_URL : '/';
 
             while (keepFetching) {
-                const url = `${API_URL}api/workflows/${organization}/${project}/${stack}/deployments/${deploymentID}/logs${
+                const url = `${API_URL}api/workloads/${organization}/${project}/${stack}/deployments/${deploymentID}/logs${
                     continuationToken ? `?continuationToken=${continuationToken}` : ''
                 }`;
 

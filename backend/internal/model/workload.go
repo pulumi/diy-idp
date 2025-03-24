@@ -7,7 +7,7 @@ type Tag struct {
 	Value string `json:"value"`
 }
 
-type WorkflowRequest struct {
+type WorkloadRequest struct {
 	BlueprintName string                   `json:"blueprintName"`
 	Blueprint     string                   `json:"blueprint"`
 	Name          string                   `json:"name"`
@@ -19,7 +19,7 @@ type WorkflowRequest struct {
 	CookieCut     bool                     `json:"cookiecut"`
 }
 
-type WorkflowResponse struct {
+type WorkloadResponse struct {
 	BlueprintName string                   `json:"blueprintName"`
 	Blueprint     string                   `json:"blueprint"`
 	Name          string                   `json:"name"`
@@ -76,15 +76,15 @@ type LogResponse struct {
 	NextToken string    `json:"nextToken,omitempty"`
 }
 
-type WorkflowPropertyOverride struct {
+type WorkloadPropertyOverride struct {
 	Name     string `yaml:"name" json:"name"`
 	Type     string `yaml:"type" json:"type"`
 	Title    string `yaml:"title" json:"title"`
 	Required bool   `yaml:"required" json:"required"`
 }
 
-type Workflow struct {
-	WorkflowPropertyOverrides []WorkflowPropertyOverride `yaml:"properties" json:"properties"`
+type Workload struct {
+	WorkloadPropertyOverrides []WorkloadPropertyOverride `yaml:"properties" json:"properties"`
 }
 
 type Team struct {

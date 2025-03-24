@@ -18,13 +18,13 @@ type Stack = {
     deploymentId: string;
     tags?: {
         "idp:projectid"?: string;
-        "idp:workflow"?: string;
+        "idp:workload"?: string;
         [key: string]: string | undefined;
     };
     version?: number;
 }
 
-type Workflow = {
+type Workload = {
     orgName: string;
     projectName: string;
     stackName: string;
@@ -33,7 +33,7 @@ type Workflow = {
     result: string;
     tags?: {
         "idp:projectid"?: string;
-        "idp:workflow"?: string;
+        "idp:workload"?: string;
         [key: string]: string | undefined;
     };
     version?: number;
@@ -42,10 +42,10 @@ type Workflow = {
 }
 
 
-export default function WorkflowDetail() {
+export default function WorkloadDetail() {
     const {organization, blueprintName, name} = useParams();
-    const [workflow, setWorkflow] = useState(null);
-    const [workflowDetails, setWorkflowDetails] = useState<Workflow | null>(null);
+    const [workload, setWorkload] = useState(null);
+    const [workloadDetails, setWorkloadDetails] = useState<Workload | null>(null);
     const [loading, setLoading] = useState(true);
     const [detailsLoading, setDetailsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -57,20 +57,20 @@ export default function WorkflowDetail() {
     const navigate = useNavigate();
     const auth = useAuth();
 
-    const fetchWorkflowAdditionalDetails = () => {
+    const fetchWorkloadAdditionalDetails = () => {
         setDetailsLoading(true);
 
         const API_URL = import.meta.env.MODE === 'production' ? import.meta.env.VITE_API_URL : '/';
 
-        fetch(`${API_URL}api/workflows/${organization}/${blueprintName}/${name}`)
+        fetch(`${API_URL}api/workloads/${organization}/${blueprintName}/${name}`)
             .then(res => {
                 if (!res.ok) {
                     throw new Error(`Failed to fetch details: ${res.status}`);
                 }
                 return res.json();
             })
-            .then((data: Workflow) => {
-                setWorkflowDetails(data);
+            .then((data: Workload) => {
+                setWorkloadDetails(data);
                 setDetailsLoading(false);
             })
             .catch(err => {
@@ -81,8 +81,8 @@ export default function WorkflowDetail() {
 
     const fetchSchemaForEditing = () => {
 
-        if (!workflowDetails) {
-            fetchWorkflowAdditionalDetails();
+        if (!workloadDetails) {
+            fetchWorkloadAdditionalDetails();
             return;
         }
 
@@ -127,17 +127,17 @@ export default function WorkflowDetail() {
     };
 
     useEffect(() => {
-        fetchWorkflowAdditionalDetails();
+        fetchWorkloadAdditionalDetails();
     }, [organization, blueprintName, name]);
 
     const handleRefresh = () => {
-        fetchWorkflowAdditionalDetails();
+        fetchWorkloadAdditionalDetails();
     };
 
     const handleEditClick = () => {
 
-        if (!workflowDetails) {
-            fetchWorkflowAdditionalDetails();
+        if (!workloadDetails) {
+            fetchWorkloadAdditionalDetails();
         }
         fetchSchemaForEditing();
         setIsEditing(true);
@@ -155,19 +155,19 @@ export default function WorkflowDetail() {
 
         const advancedData = Array.isArray(formData) ? formData : [formData];
 
-        fetch(`${API_URL}api/workflows/${organization}/${blueprintName}/${name}`, {
+        fetch(`${API_URL}api/workloads/${organization}/${blueprintName}/${name}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                ...workflowDetails,
+                ...workloadDetails,
                 advanced: advancedData
             }),
         })
             .then(res => {
                 if (!res.ok) {
-                    throw new Error(`Failed to update workflow: ${res.status}`);
+                    throw new Error(`Failed to update workload: ${res.status}`);
                 }
                 return res.json();
             })
@@ -175,7 +175,7 @@ export default function WorkflowDetail() {
                 setIsEditing(false);
                 setEditLoading(false);
 
-                navigate(`/workflows/${organization}/${blueprintName}/${name}`);
+                navigate(`/workloads/${organization}/${blueprintName}/${name}`);
             })
             .catch(err => {
                 setError(err.message);
@@ -230,13 +230,13 @@ export default function WorkflowDetail() {
 
 
     const renderAdvancedSettings = () => {
-        if (!workflowDetails || !workflowDetails.advanced || workflowDetails.advanced.length === 0) {
+        if (!workloadDetails || !workloadDetails.advanced || workloadDetails.advanced.length === 0) {
             return <p className="text-gray-500 dark:text-gray-400 text-sm">No advanced settings configured.</p>;
         }
 
         return (
             <div className="space-y-4">
-                {workflowDetails.advanced.map((item, index) => (
+                {workloadDetails.advanced.map((item, index) => (
                     <div key={index} className="bg-gray-50 dark:bg-gray-700 p-4 ">
                         {Object.entries(item).map(([key, value]) => (
                             <div key={key} className="flex justify-between mb-2">
@@ -257,14 +257,14 @@ export default function WorkflowDetail() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="mb-8 justify-between items-center max-w-auto">
                     <Banner
-                        title={auth.isAuthenticated ? `Workflow: ${name}` : 'Workflow Details'}
+                        title={auth.isAuthenticated ? `Workload: ${name}` : 'Workload Details'}
                         body={`Organization: ${organization} | Blueprint: ${blueprintName}`}
                     />
                 </div>
 
                 <div className="flex justify-between mb-6">
                     <button
-                        onClick={() => navigate('/workflows')}
+                        onClick={() => navigate('/workloads')}
                         className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-900"
                     >
                         <ArrowLeft className="h-4 w-4 mr-2"/>
@@ -284,7 +284,7 @@ export default function WorkflowDetail() {
                     <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                         <div className="flex items-center">
                             <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                                Workflow Details
+                                Workload Details
                             </h3>
                         </div>
                     </div>
@@ -297,7 +297,7 @@ export default function WorkflowDetail() {
                             <div className="bg-red-50 dark:bg-red-900/30 p-4 ">
                                 <p className="text-sm text-red-700 dark:text-red-400">{detailsError}</p>
                             </div>
-                        ) : workflowDetails ? (
+                        ) : workloadDetails ? (
                             <div>
                                 {/* Display other details like resources, status, etc. */}
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
@@ -306,14 +306,14 @@ export default function WorkflowDetail() {
                                             className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Organization
                                         </div>
                                         <div
-                                            className="text-sm text-gray-900 dark:text-white">{workflowDetails?.stack?.orgName}</div>
+                                            className="text-sm text-gray-900 dark:text-white">{workloadDetails?.stack?.orgName}</div>
                                     </div>
                                     <div className="bg-gray-50 dark:bg-gray-700 p-4 ">
                                         <div
                                             className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Project
                                         </div>
                                         <div
-                                            className="text-sm text-gray-900 dark:text-white">{workflowDetails.stack?.projectName}</div>
+                                            className="text-sm text-gray-900 dark:text-white">{workloadDetails.stack?.projectName}</div>
                                     </div>
                                     <div className="bg-gray-50 dark:bg-gray-700 p-4 ">
                                         <div
@@ -321,7 +321,7 @@ export default function WorkflowDetail() {
                                             Count
                                         </div>
                                         <div
-                                            className="text-sm text-gray-900 dark:text-white">{workflowDetails.stack?.resourceCount}</div>
+                                            className="text-sm text-gray-900 dark:text-white">{workloadDetails.stack?.resourceCount}</div>
                                     </div>
                                     <div className="bg-gray-50 dark:bg-gray-700 p-4 ">
                                         <div
@@ -329,8 +329,8 @@ export default function WorkflowDetail() {
                                         </div>
                                         <div className="text-sm">
                                             <span
-                                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getBadgeColorClass(workflowDetails.stack?.result)}`}>
-                                                {getStatusText(workflowDetails.stack?.result)}
+                                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getBadgeColorClass(workloadDetails.stack?.result)}`}>
+                                                {getStatusText(workloadDetails.stack?.result)}
                                             </span>
                                         </div>
                                     </div>
@@ -339,7 +339,7 @@ export default function WorkflowDetail() {
                                             Update
                                         </div>
                                         <div
-                                            className="text-sm text-gray-900 dark:text-white">{formatDate(workflowDetails.stack?.lastUpdate)}</div>
+                                            className="text-sm text-gray-900 dark:text-white">{formatDate(workloadDetails.stack?.lastUpdate)}</div>
                                     </div>
                                     <div className="bg-gray-50 dark:bg-gray-700 p-4 ">
                                         <div
@@ -347,14 +347,14 @@ export default function WorkflowDetail() {
                                             ID
                                         </div>
                                         <div
-                                            className="text-sm text-gray-900 dark:text-white">{workflowDetails.stack?.tags?.["idp:projectid"] || "N/A"}</div>
+                                            className="text-sm text-gray-900 dark:text-white">{workloadDetails.stack?.tags?.["idp:projectid"] || "N/A"}</div>
                                     </div>
                                     <div className="bg-gray-50 dark:bg-gray-700 p-4 ">
                                         <div
                                             className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Stage
                                         </div>
                                         <div
-                                            className="text-sm text-gray-900 dark:text-white">{workflowDetails.stack?.tags?.["idp:stage"] || "N/A"}</div>
+                                            className="text-sm text-gray-900 dark:text-white">{workloadDetails.stack?.tags?.["idp:stage"] || "N/A"}</div>
                                     </div>
                                 </div>
                             </div>
@@ -395,7 +395,7 @@ export default function WorkflowDetail() {
                                             <TailwindThemedForm
                                                 schema={editSchema}
                                                 uiSchema={editUiSchema}
-                                                formData={workflowDetails?.advanced?.[0] || {}}
+                                                formData={workloadDetails?.advanced?.[0] || {}}
                                                 validator={validator}
                                                 onSubmit={handleSubmitEdit}
                                             >
@@ -427,7 +427,7 @@ export default function WorkflowDetail() {
                                     <div className="flex justify-center items-center py-4">
                                         <LoadingSpinner/>
                                     </div>
-                                ) : workflowDetails ? (
+                                ) : workloadDetails ? (
                                     renderAdvancedSettings()
                                 ) : (
                                     <p className="text-gray-500 dark:text-gray-400 text-sm">No advanced settings
@@ -437,8 +437,8 @@ export default function WorkflowDetail() {
                         )}
                     </div>
                 </div>
-                <DeploymentLogsTerminal deploymentID={workflowDetails?.stack?.deploymentId} stack={workflowDetails?.stack?.stackName}
-                                        organization={workflowDetails?.stack?.orgName} project={workflowDetails?.stack?.projectName} />
+                <DeploymentLogsTerminal deploymentID={workloadDetails?.stack?.deploymentId} stack={workloadDetails?.stack?.stackName}
+                                        organization={workloadDetails?.stack?.orgName} project={workloadDetails?.stack?.projectName} />
             </div>
         </div>
     );

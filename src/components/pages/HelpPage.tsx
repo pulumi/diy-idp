@@ -105,7 +105,7 @@ const HelpPage = () => {
                     </CardHeader>
                     <CardContent>
                         <p className="text-slate-600 dark:text-gray-400">
-                            Power up your workflow with our command-line tools.
+                            Power up your workload with our command-line tools.
                             Automate common tasks and integrate with your existing scripts.
                         </p>
                     </CardContent>
@@ -130,7 +130,7 @@ const HelpPage = () => {
                 <TabsList className="grid grid-cols-2 lg:grid-cols-4 w-full">
                     <TabsTrigger value="getting-started">Getting Started</TabsTrigger>
                     <TabsTrigger value="core-concepts">Core Concepts</TabsTrigger>
-                    <TabsTrigger value="workflows">Workflows</TabsTrigger>
+                    <TabsTrigger value="workloads">Workloads</TabsTrigger>
                     <TabsTrigger value="api-docs">API Docs</TabsTrigger>
                 </TabsList>
 
@@ -186,9 +186,9 @@ const HelpPage = () => {
                         <CardContent>
                             <div className="space-y-6">
                                 <div>
-                                    <h3 className="text-lg font-semibold text-slate-900 dark:text-gray-100 mb-2">Workflows</h3>
+                                    <h3 className="text-lg font-semibold text-slate-900 dark:text-gray-100 mb-2">Workloads</h3>
                                     <p className="text-slate-600 dark:text-gray-400">
-                                        Workflows are isolated environments where you can manage related projects
+                                        Workloads are isolated environments where you can manage related projects
                                         and resources. They help organize work and control access across teams.
                                     </p>
                                 </div>
@@ -206,7 +206,7 @@ const HelpPage = () => {
                                     <h3 className="text-lg font-semibold text-slate-900 dark:text-gray-100 mb-2">Deployment
                                         Pipelines</h3>
                                     <p className="text-slate-600 dark:text-gray-400">
-                                        Automated workflows that handle building, testing, and deploying your
+                                        Automated workloads that handle building, testing, and deploying your
                                         applications across different environments.
                                     </p>
                                 </div>

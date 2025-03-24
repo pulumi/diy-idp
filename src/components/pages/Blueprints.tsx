@@ -61,7 +61,7 @@ export default function BlueprintGrid() {
     }, []);
 
     const handleBlueprintClick = (blueprint: Blueprint) => {
-        navigate(`/workflows/create/${blueprint.name}`);
+        navigate(`/workloads/create/${blueprint.name}`);
     };
 
     if (loading) return <LoadingSpinner/>;
