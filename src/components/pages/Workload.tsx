@@ -412,17 +412,17 @@ export function CreateWorkload() {
 
     useEffect(() => {
         let isMounted = true;
+        const API_URL = import.meta.env.MODE === 'production' ? import.meta.env.VITE_API_URL : '/';
 
-
-        const fetchSchema = fetch(`/api/blueprints/${blueprintName}/schema`)
+        const fetchSchema = fetch(`${API_URL}api/blueprints/${blueprintName}/schema`)
             .then(res => res.json());
 
 
-        const fetchMetadata = fetch(`/api/workloads/schema`)
+        const fetchMetadata = fetch(`${API_URL}api/workloads/schema`)
             .then(res => res.json());
 
 
-        const fetchUiSchema = fetch(`/api/blueprints/${blueprintName}/ui-schema`)
+        const fetchUiSchema = fetch(`${API_URL}api/blueprints/${blueprintName}/ui-schema`)
             .then(res => res.json());
 
 
@@ -493,7 +493,8 @@ export function CreateWorkload() {
     }, [blueprintName]);
 
     const handleSubmit = ({formData}) => {
-        fetch('/api/workloads', {
+        const API_URL = import.meta.env.MODE === 'production' ? import.meta.env.VITE_API_URL : '/';
+        fetch(`${API_URL}api/workloads`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

@@ -246,8 +246,6 @@ func (s *PulumiService) ListStacks(options *model.ListStacksOptions) (*model.Lis
 func (s *PulumiService) CreateStackSettings(organization, project, stack, cloneUrl string) error {
 	url := fmt.Sprintf("%s/stacks/%s/%s/%s/deployments/settings", s.cfg.Pulumi.APIBaseURL, organization, project, stack)
 
-	fmt.Println(url)
-
 	deploymentRequest := model.CreateDeploymentRequest{
 		SourceContext: &model.SourceContext{
 			Git: &model.GitSource{
@@ -263,10 +261,8 @@ func (s *PulumiService) CreateStackSettings(organization, project, stack, cloneU
 			},
 		},
 	}
-	fmt.Println("Deployment Request: ", deploymentRequest)
 
 	requestBody, err := json.Marshal(deploymentRequest)
-	fmt.Println("Request Body: ", string(requestBody))
 	if err != nil {
 		return fmt.Errorf("failed to marshal request body: %w", err)
 	}
@@ -291,7 +287,6 @@ func (s *PulumiService) CreateStackSettings(organization, project, stack, cloneU
 	if err != nil {
 		return fmt.Errorf("error reading response body: %w", err)
 	}
-	fmt.Println("Body: ", string(body))
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, string(body))
 	}
@@ -308,16 +303,12 @@ func (s *PulumiService) CreateStackSettings(organization, project, stack, cloneU
 func (s *PulumiService) DeleteDeployment(organization, project, stack string) error {
 	url := fmt.Sprintf("%s/stacks/%s/%s/%s/deployments", s.cfg.Pulumi.APIBaseURL, organization, project, stack)
 
-	fmt.Println("URL: ", url)
-
 	deploymentRequest := model.CreateDeploymentRequest{
 		InheritSettings: pulumi.BoolRef(true),
 		Operation:       "destroy",
 	}
-	fmt.Println("Deployment Request: ", deploymentRequest)
 
 	requestBody, err := json.Marshal(deploymentRequest)
-	fmt.Println("Request Body: ", string(requestBody))
 	if err != nil {
 		return fmt.Errorf("failed to marshal request body: %w", err)
 	}
@@ -342,7 +333,6 @@ func (s *PulumiService) DeleteDeployment(organization, project, stack string) er
 	if err != nil {
 		return fmt.Errorf("error reading response body: %w", err)
 	}
-	fmt.Println("Body: ", string(body))
 
 	if resp.StatusCode != http.StatusAccepted {
 		return fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, string(body))
@@ -360,16 +350,11 @@ func (s *PulumiService) CreateDeployment(organization, project, stack, cloneUrl 
 
 	url := fmt.Sprintf("%s/stacks/%s/%s/%s/deployments", s.cfg.Pulumi.APIBaseURL, s.cfg.Pulumi.Organization, project, stack)
 
-	fmt.Println("URL: ", url)
-
 	deploymentRequest := model.CreateDeploymentRequest{
 		InheritSettings: pulumi.BoolRef(true),
 		Operation:       "update",
 	}
-	fmt.Println("Deployment Request: ", deploymentRequest)
-
 	requestBody, err := json.Marshal(deploymentRequest)
-	fmt.Println("Request Body: ", string(requestBody))
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal request body: %w", err)
 	}
@@ -394,7 +379,6 @@ func (s *PulumiService) CreateDeployment(organization, project, stack, cloneUrl 
 	if err != nil {
 		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
-	fmt.Println("Body: ", string(body))
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, string(body))
 	}
@@ -411,14 +395,13 @@ func (s *PulumiService) CreateDeployment(organization, project, stack, cloneUrl 
 // RunPulumiUp runs a Pulumi update
 func (s *PulumiService) RunPulumiUp(pulumiProjectName, bluePrintName, cloneUrl string, pulumiConfig []map[string]interface{}, stage string) {
 	go func() {
-		fmt.Println(pulumiProjectName, bluePrintName, cloneUrl, pulumiConfig, stage)
 		configuration := esc.NewConfiguration()
 		escClient := esc.NewClient(configuration)
 		authCtx := esc.NewAuthContext(s.cfg.Pulumi.APIToken)
 
 		err := escClient.CreateEnvironment(authCtx, s.cfg.Pulumi.Organization, bluePrintName, pulumiProjectName)
 		if err != nil {
-			fmt.Errorf("error creating environment: %w", err)
+			_ = fmt.Errorf("error creating environment: %w", err)
 		}
 
 		updatePayload := &esc.EnvironmentDefinition{
@@ -436,16 +419,14 @@ func (s *PulumiService) RunPulumiUp(pulumiProjectName, bluePrintName, cloneUrl s
 			}
 		}
 
-		diag, err := escClient.UpdateEnvironment(authCtx, s.cfg.Pulumi.Organization, bluePrintName, pulumiProjectName, updatePayload)
+		_, err = escClient.UpdateEnvironment(authCtx, s.cfg.Pulumi.Organization, bluePrintName, pulumiProjectName, updatePayload)
 		if err != nil {
-			fmt.Errorf("error updating environment: %w", err)
+			_ = fmt.Errorf("error updating environment: %w", err)
 		}
-
-		fmt.Println(diag)
 
 		_, err = s.CreateDeployment(s.cfg.Pulumi.Organization, bluePrintName, pulumiProjectName, cloneUrl)
 		if err != nil {
-			fmt.Errorf("error creating deployment: %w", err)
+			_ = fmt.Errorf("error creating deployment: %w", err)
 		}
 	}()
 	fmt.Println("Pulumi deployment started in background")

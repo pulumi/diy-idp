@@ -37,8 +37,8 @@ func (s *GitHubService) ExchangeCodeForToken(code string) (*model.OAuthResponse,
 	}
 
 	githubReq := map[string]string{
-		"client_id":     os.Getenv("GITHUB_CLIENT_ID"),
-		"client_secret": os.Getenv("GITHUB_CLIENT_SECRET"),
+		"client_id":     s.cfg.GitHub.ClientID,
+		"client_secret": s.cfg.GitHub.ClientSecret,
 		"code":          code,
 	}
 

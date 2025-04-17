@@ -4,24 +4,24 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
-	"os"
+	"github.com/pulumi-idp/internal/config"
 )
 
-func New() *echo.Echo {
+func New(cfg *config.Config) *echo.Echo {
 	e := echo.New()
 	e.Logger.SetLevel(log.DEBUG)
 	e.Pre(middleware.RemoveTrailingSlash())
+	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(middleware.Logger())
-
-	clientURL := os.Getenv("CLIENT_URL")
-	if clientURL == "" {
-		clientURL = "http://localhost:5173"
-	}
+	e.Use(middleware.Recover())
 
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{clientURL},
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
-		AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
+		AllowOrigins:     cfg.Cors.AllowOrigin,
+		AllowMethods:     cfg.Cors.AllowMethods,
+		AllowHeaders:     cfg.Cors.AllowHeaders,
+		AllowCredentials: cfg.Cors.AllowCredentials,
+		ExposeHeaders:    cfg.Cors.ExposeHeaders,
+		MaxAge:           cfg.Cors.MaxAge,
 	}))
 	return e
 }

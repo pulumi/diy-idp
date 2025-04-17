@@ -16,6 +16,7 @@ func (h *Handler) Register(v1 *echo.Group) {
 	workload := v1.Group("/workloads")
 	workload.GET("/schema", h.GetWorkloadSchema)
 	workload.POST("", h.CreateWorkload)
+
 	workload.PUT("/:organization/:project/:stack", h.UpdateWorkload)
 	workload.DELETE("/:organization/:project/:stack", h.DeleteWorkload)
 	workload.GET("", h.GetWorkloads)

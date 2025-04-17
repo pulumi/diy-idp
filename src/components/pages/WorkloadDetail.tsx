@@ -152,7 +152,6 @@ export default function WorkloadDetail() {
         const API_URL = import.meta.env.MODE === 'production' ? import.meta.env.VITE_API_URL : '/';
 
 
-
         const advancedData = Array.isArray(formData) ? formData : [formData];
 
         fetch(`${API_URL}api/workloads/${organization}/${blueprintName}/${name}`, {
@@ -205,7 +204,6 @@ export default function WorkloadDetail() {
             minute: '2-digit'
         });
     };
-
 
 
     const getBadgeColorClass = (result) => {
@@ -437,8 +435,10 @@ export default function WorkloadDetail() {
                         )}
                     </div>
                 </div>
-                <DeploymentLogsTerminal deploymentID={workloadDetails?.stack?.deploymentId} stack={workloadDetails?.stack?.stackName}
-                                        organization={workloadDetails?.stack?.orgName} project={workloadDetails?.stack?.projectName} />
+                <DeploymentLogsTerminal
+                    host={window.location.host}
+                    deploymentID={workloadDetails?.stack?.deploymentId} stack={workloadDetails?.stack?.stackName}
+                    organization={workloadDetails?.stack?.orgName} project={workloadDetails?.stack?.projectName}/>
             </div>
         </div>
     );

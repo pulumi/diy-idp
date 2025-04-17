@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {Terminal} from 'lucide-react';
 
-export default function DeploymentLogsTerminal({organization, project, stack, deploymentID}) {
+export default function DeploymentLogsTerminal({host, organization, project, stack, deploymentID}) {
     const [logs, setLogs] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -36,8 +36,7 @@ export default function DeploymentLogsTerminal({organization, project, stack, de
             setError(null);
             setLogs([]);
 
-
-            const wsUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/api/workloads/ws/${organization}/${project}/${stack}/deployments/${deploymentID}/logs`;
+            const wsUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${host.replace(/^https?:\/\//, '')}/api/workloads/ws/${organization}/${project}/${stack}/deployments/${deploymentID}/logs`;
 
             const socket = new WebSocket(wsUrl);
             wsRef.current = socket;

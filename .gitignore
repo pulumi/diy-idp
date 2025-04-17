@@ -24,3 +24,4 @@ dist-ssr
 *.sw?
 **/.env*
 **/blueprints_cache.json
+**/pulumi-idp

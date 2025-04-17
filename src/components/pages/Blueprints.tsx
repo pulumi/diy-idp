@@ -36,9 +36,9 @@ export default function BlueprintGrid() {
 
     useEffect(() => {
         let isMounted = true;
-        const API_URL = import.meta.env.MODE === 'production' ? import.meta.env.VITE_API_URL : '';
+        const API_URL = import.meta.env.MODE === 'production' ? import.meta.env.VITE_API_URL : '/';
 
-        fetch(API_URL + '/api/blueprints')
+        fetch(`${API_URL}api/blueprints/`)
             .then(res => {
                 if (!res.ok) throw new Error('Failed to fetch blueprints');
                 return res.json() as Promise<Blueprint[]>;

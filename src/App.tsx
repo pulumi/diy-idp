@@ -13,22 +13,22 @@ import ListWorkloads, {CreateWorkload} from "./components/pages/Workload.tsx";
 import WorkloadDetail from "./components/pages/WorkloadDetail.tsx";
 
 const oidcConfig = {
-    authority: "https://github.com/login/oauth/authorize",
-    client_id: 'Ov23lizXFAbOUkmWXuvN',
+    authority: import.meta.env.VITE_GITHUB_AUTH_URL,
+    client_id: import.meta.env.VITE_GITHUB_CLIENT_ID,
     redirect_uri: `${window.location.origin}/callback`,
 
-    authorization_endpoint: 'https://github.com/login/oauth/authorize',
-    token_endpoint: '/api/auth/github/token',
-    userinfo_endpoint: 'https://api.github.com/user',
+    authorization_endpoint: import.meta.env.VITE_GITHUB_AUTH_URL,
+    token_endpoint: import.meta.env.VITE_GITHUB_TOKEN_ENDPOINT,
+    userinfo_endpoint: import.meta.env.VITE_GITHUB_USER_API,
 
-    scope: 'read:user user:email', // Adjust scopes based on your needs
+    scope: import.meta.env.VITE_GITHUB_SCOPE || 'read:user user:email',
     loadUserInfo: true,
 
     response_type: 'code',
     metadata: {
-        authorization_endpoint: 'https://github.com/login/oauth/authorize',
-        token_endpoint: '/api/github/token',
-        userinfo_endpoint: 'https://api.github.com/user',
+        authorization_endpoint: import.meta.env.VITE_GITHUB_AUTH_URL,
+        token_endpoint: import.meta.env.VITE_GITHUB_TOKEN_ENDPOINT,
+        userinfo_endpoint: import.meta.env.VITE_GITHUB_USER_API,
     },
 };
 
@@ -45,14 +45,15 @@ function App() {
                         <Route
                             path="/*"
                             element={
-                                <ProtectedRoute>
+                                <ProtectedRoute orgName={import.meta.env.VITE_GITHUB_ORG_NAME}>
                                     <Routes>
                                         <Route path="profile" element={<ProfileCard/>}/>
                                         <Route path="workloads/*" element={
                                             <Routes>
                                                 <Route path="create/:blueprintName" element={<CreateWorkload/>}/>
                                                 <Route path="" element={<ListWorkloads/>}/>
-                                                <Route path="/:organization/:blueprintName/:name" element={<WorkloadDetail />} />
+                                                <Route path="/:organization/:blueprintName/:name"
+                                                       element={<WorkloadDetail/>}/>
                                             </Routes>
                                         }/>
                                     </Routes>

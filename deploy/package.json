@@ -1,11 +1,14 @@
 {
-    "name": "pulumi-idp",
-    "main": "index.ts",
-    "devDependencies": {
-        "@types/node": "^18",
-        "typescript": "^5.0.0"
-    },
-    "dependencies": {
-        "@pulumi/pulumi": "^3.113.0"
-    }
+  "name": "pulumi-idp",
+  "main": "index.ts",
+  "devDependencies": {
+    "@types/node": "^18",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@pulumi/pulumi": "^3.113.0",
+    "@pulumi/aws": "6.76.0",
+    "@pulumi/docker": "^4.6.2",
+    "@pulumi/tls-self-signed-cert": "^0.1.3"
+  }
 }

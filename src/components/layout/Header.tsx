@@ -225,7 +225,7 @@ export default function Header() {
                                       className={getLinkClassName("/help")}
                                       aria-current={isActiveRoute("/help") ? "page" : undefined}
                                 >
-                                    <HelpCircle esize={24}
+                                    <HelpCircle size={24}
                                                 className={isActiveRoute("/help") ? "text-primary-600 dark:text-primary-400" : ""}
                                     />
                                 </Link>

@@ -3,16 +3,13 @@ package main
 import (
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"github.com/pulumi-idp/internal/api/handler"
 	"github.com/pulumi-idp/internal/config"
 	cleanup "github.com/pulumi-idp/internal/cron"
-	"github.com/pulumi-idp/internal/database"
 	"github.com/pulumi-idp/internal/repository"
 	"github.com/pulumi-idp/internal/service"
 	"github.com/pulumi-idp/router"
 	"log"
-	"net/http"
 )
 
 func main() {
@@ -23,16 +20,7 @@ func main() {
 
 	cfg := config.Load()
 
-	db, err := database.NewDatabase(cfg.Database)
-	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
-	}
-
-	if err := database.RunMigrations(db); err != nil {
-		log.Fatalf("Failed to run migrations: %v", err)
-	}
-
-	repos := repository.NewRepository(db)
+	repos := repository.NewRepository()
 	services := service.NewService(repos, cfg)
 
 	deletionCriteria := cleanup.StackDeletionCriteria{
@@ -41,22 +29,18 @@ func main() {
 			Value: "true",
 		},
 	}
-	r := router.New()
+	r := router.New(cfg)
 
 	cleanupService := cleanup.NewStackCleanupService(cfg, deletionCriteria, r.StdLogger)
-
 	if err := cleanupService.Start(); err != nil {
 		r.Logger.Fatalf("Failed to start stack cleanup service: %v", err)
 	}
 
-	r.Use(middleware.Logger())
-	r.Use(middleware.Recover())
-	r.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"*"}, // Adjust for production
-		AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
-		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
-		AllowCredentials: true,
-	}))
+	// healthcheck
+	r.GET("/", func(c echo.Context) error {
+		return c.String(200, "Pulumi IDP API")
+	})
+
 	v1 := r.Group("/api")
 	h := handler.NewHandler(services, cfg)
 	h.Register(v1)

@@ -179,8 +179,10 @@ func (s *WorkloadService) GetWorkloadSchema(c echo.Context) (map[string]interfac
 	escClient := esc.NewClient(configuration)
 	authCtx := esc.NewAuthContext(s.cfg.Pulumi.APIToken)
 
-	projName := "pulumi-idp"
-	envName := "dev"
+	workloadDefinitionLocation := s.cfg.Pulumi.WorkloadDefinitionLocation
+
+	projName := strings.Split(workloadDefinitionLocation, "/")[0]
+	envName := strings.Split(workloadDefinitionLocation, "/")[1]
 
 	_, values, err := escClient.OpenAndReadEnvironment(authCtx, s.cfg.Pulumi.Organization, projName, envName)
 	if err != nil {
@@ -322,7 +324,7 @@ func (s *WorkloadService) UpdateWorkload(organization, project, stack string, re
 	}
 
 	name := stringy.New(req.Name).KebabCase("?", "-").ToLower()
-	s.pulumiService.RunPulumiUp(name, req.BlueprintName, fmt.Sprintf("https://github.com/%s/blueprints.git", "dirien"), req.Advanced, req.Stage)
+	s.pulumiService.RunPulumiUp(name, req.BlueprintName, fmt.Sprintf("https://github.com/%s.git", s.cfg.Pulumi.BlueprintGithubLocation), req.Advanced, req.Stage)
 
 	return nil
 }
@@ -433,8 +435,8 @@ func (s *WorkloadService) CreateWorkload(ctx context.Context, req *model.Workloa
 			Success:  true,
 		}, nil
 	} else {
-		repo := fmt.Sprintf("https://github.com/%s/blueprints.git", "dirien")
-		s.pulumiService.RunPulumiUp(name, req.BlueprintName, fmt.Sprintf("https://github.com/%s/blueprints.git", "dirien"), req.Advanced, req.Stage)
+		repo := fmt.Sprintf("https://github.com/%s.git", s.cfg.Pulumi.BlueprintGithubLocation)
+		s.pulumiService.RunPulumiUp(name, req.BlueprintName, fmt.Sprintf("https://github.com/%s.git", s.cfg.Pulumi.BlueprintGithubLocation), req.Advanced, req.Stage)
 
 		return &model.RepoCreationResponse{
 			RepoURL:  repo,

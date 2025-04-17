@@ -117,20 +117,17 @@ func (h *Handler) UpdateWorkload(c echo.Context) error {
 // CreateWorkload handles the request to create a new workload
 func (h *Handler) CreateWorkload(c echo.Context) error {
 	ctx := c.Request().Context()
-
 	req := new(model.WorkloadRequest)
 	if err := c.Bind(req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid request format",
+			"error": fmt.Sprintf("Invalid request format: %v", err),
 		})
 	}
-
 	if req.Name == "" {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": "Repository name is required",
 		})
 	}
-
 	if req.Blueprint == "" {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": "Pulumi template is required",

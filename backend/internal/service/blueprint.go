@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/google/go-github/github"
@@ -46,25 +47,31 @@ func (s *BlueprintService) GetBlueprints(c echo.Context) ([]model.Blueprint, err
 		return blueprints, nil
 	}
 
-	// If cache is invalid or doesn't exist, fetch from GitHub
-	token := os.Getenv("GITHUB_TOKEN")
-	if token == "" {
-		return nil, fmt.Errorf("GITHUB_TOKEN environment variable not set")
-	}
-
 	ctx := context.Background()
 	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: token},
+		&oauth2.Token{AccessToken: s.cfg.GitHub.Token},
 	)
 	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
 
 	// Get repository content (top-level directories)
+
+	blueprintsGitHubLocation := s.cfg.Pulumi.BlueprintGithubLocation
+	owner := strings.Split(blueprintsGitHubLocation, "/")[0]
+	repo := strings.Split(blueprintsGitHubLocation, "/")[1]
+
+	var path string
+	if len(strings.Split(blueprintsGitHubLocation, "/")) > 2 {
+		path = strings.Split(blueprintsGitHubLocation, "/")[2]
+	} else {
+		path = ""
+	}
+
 	_, directoryContent, _, err := client.Repositories.GetContents(
 		ctx,
-		"dirien",
-		"blueprints",
-		"",
+		owner,
+		repo,
+		path,
 		&github.RepositoryContentGetOptions{},
 	)
 	if err != nil {
@@ -85,8 +92,8 @@ func (s *BlueprintService) GetBlueprints(c echo.Context) ([]model.Blueprint, err
 			// For each directory, try to get the Pulumi.yaml file
 			fileContent, _, _, err := client.Repositories.GetContents(
 				ctx,
-				"dirien",
-				"blueprints",
+				owner,
+				repo,
 				fmt.Sprintf("%s/Pulumi.yaml", *content.Path),
 				&github.RepositoryContentGetOptions{},
 			)
@@ -183,22 +190,22 @@ func getRuntime(runtimeField interface{}) string {
 func (s *BlueprintService) GetBlueprintSchema(c echo.Context, name string) (map[string]interface{}, error) {
 	// Fetch from GitHub
 	ctx := context.Background()
-	token := os.Getenv("GITHUB_TOKEN")
-	if token == "" {
-		return nil, fmt.Errorf("GITHUB_TOKEN environment variable not set")
-	}
 
 	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: token},
+		&oauth2.Token{AccessToken: s.cfg.GitHub.Token},
 	)
 	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
 
+	blueprintsGitHubLocation := s.cfg.Pulumi.BlueprintGithubLocation
+	owner := strings.Split(blueprintsGitHubLocation, "/")[0]
+	repo := strings.Split(blueprintsGitHubLocation, "/")[1]
+
 	// Get the Pulumi.yaml file for the specified blueprint
 	fileContent, _, _, err := client.Repositories.GetContents(
 		ctx,
-		"dirien",
-		"blueprints",
+		owner,
+		repo,
 		fmt.Sprintf("%s/Pulumi.yaml", name),
 		&github.RepositoryContentGetOptions{},
 	)
@@ -369,22 +376,21 @@ func (s *BlueprintService) GetBlueprintSchema(c echo.Context, name string) (map[
 func (s *BlueprintService) GetBlueprintUISchema(c echo.Context, name string) (map[string]map[string]interface{}, error) {
 	// Fetch from GitHub
 	ctx := context.Background()
-	token := os.Getenv("GITHUB_TOKEN")
-	if token == "" {
-		return nil, fmt.Errorf("GITHUB_TOKEN environment variable not set")
-	}
-
 	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: token},
+		&oauth2.Token{AccessToken: s.cfg.GitHub.Token},
 	)
 	tc := oauth2.NewClient(ctx, ts)
 	client := github.NewClient(tc)
 
+	blueprintsGitHubLocation := s.cfg.Pulumi.BlueprintGithubLocation
+	owner := strings.Split(blueprintsGitHubLocation, "/")[0]
+	repo := strings.Split(blueprintsGitHubLocation, "/")[1]
+
 	// Get the Pulumi.yaml file for the specified blueprint
 	fileContent, _, _, err := client.Repositories.GetContents(
 		ctx,
-		"dirien",
-		"blueprints",
+		owner,
+		repo,
 		fmt.Sprintf("%s/Pulumi.yaml", name),
 		&github.RepositoryContentGetOptions{},
 	)
@@ -606,8 +612,6 @@ func (s *BlueprintService) convertToJSONSchema(overrides []model.PropertyOverrid
 	}
 
 	var escEnvironment map[string]interface{}
-	fmt.Println("--------")
-	fmt.Println(esc)
 	if esc != "" {
 		environmentsResp, err := s.GetEnvironmentsForUserAndTag("", esc)
 		if err == nil && environmentsResp != nil {
@@ -662,23 +666,19 @@ func (s *BlueprintService) GetEnvironmentsForUserAndTag(continuationToken, tag s
 		return nil, fmt.Errorf("error making request: %w", err)
 	}
 	defer resp.Body.Close()
-	fmt.Println("--------")
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
-	fmt.Println("--------")
+
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("API request failed with status %d: %s", resp.StatusCode, string(body))
 	}
-	fmt.Println("--------")
 	var envResponse model.EnvironmentsResponse0
 	if err := json.Unmarshal(body, &envResponse); err != nil {
 		return nil, fmt.Errorf("error unmarshaling response: %w", err)
 	}
-
-	fmt.Println("--------")
-	fmt.Println(envResponse)
 
 	envResponse.Environments = filterByNameTag(envResponse.Environments, tag)
 
