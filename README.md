@@ -28,6 +28,8 @@ provider.
 
 ### Setup in Pulumi Cloud
 
+#### Workload Definition Fields
+
 - Create in your Pulumi Cloud console a new environment project called `pulumi-idp` and the environment called `dev`
   with following
   content:
@@ -53,6 +55,151 @@ provider.
             required: false
   ```
 
+#### Prepare ESC environment
+
+Have a look at the Blueprint repository for the Pulumi Blueprints that this IDP is using. The repository is located at
+https://github.com/pulumi/blueprints.
+
+The anatomy of a blueprint is as follows:
+
+```Pulumi.yaml
+name: ecs-aws-typescript
+author: Platform engineering team
+description: |
+  An Amazon Elastic Container Service (ECS) on AWS using Pulumi:
+  
+  * Creates an ECS Cluster
+
+runtime:
+  name: nodejs
+  options:
+    packagemanager: npm
+
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: ecs-aws-typescript
+      idp:blueprintIcon: container
+      idp:blueprintType: ecs
+      idp:blueprintLifecycle: development
+      idp:blueprintVersion: 0.2.0
+  esc:tag: aws
+
+
+template:
+  displayName: Elastic Container Service (ECS) on AWS
+  description: |
+    An Amazon Elastic Container Service (ECS) on AWS using Pulumi:
+    
+    * Creates an ECS Cluster
+
+  config:
+    aws:region:
+      default: eu-central-1
+```
+
+The `template` tag is standard Pulumi templating, but interesting is the `esc:tag` tag. This tags fetches all the ESC
+environments that are tagged with the key `esc` and a value. Here it is `aws`. This is the tag that is used to filter
+and display the stages in the Create Workload form. This is important for blueprints creating infrastructure in the
+cloud.
+
+This will automatically create a new environment in the Pulumi Cloud console with the project name `esc-aws-typescript`
+and the workload name as the environment name.
+
+If you want to provide a stage for blueprint which uses this existing infrastructure, created by the IDP, you have to
+create another environment. For example the blueprints `simple-webapp-ecs-aws-typescript` and
+`simple-webapp-kubernetes-deployment`. Let's have a look at the `simple-webapp-ecs-aws-typescript` blueprint
+which is located in the Pulumi Blueprints repository. The `Pulumi.yaml` file looks like this:
+
+```yaml
+name: simple-webapp-ecs-aws-typescript
+author: Platform engineering team
+description: |
+  A simple web application running on AWS Elastic Container Service (ECS) using Pulumi:
+
+  * Creates an Load Balancer
+  * Creates an ECS Service
+  * Creates an ECS Task Definition
+
+runtime:
+  name: nodejs
+  options:
+    packagemanager: npm
+
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: simple-webapp-ecs-aws-typescript
+      idp:blueprintIcon: panel-top
+      idp:blueprintType: webapp
+      idp:blueprintLifecycle: development
+      idp:blueprintVersion: 0.3.0
+  esc:tag: ecs
+
+template:
+  displayName: Simple Webapp ECS AWS Deployment
+  description: |
+    A simple web application running on AWS Elastic Container Service (ECS) using Pulumi:
+
+    * Creates an Load Balancer
+    * Creates an ECS Service
+    * Creates an ECS Task Definition
+
+  config:
+    aws:region:
+      default: eu-central-1
+    imageName:
+      default: "nginx:latest"
+    containerPort:
+      default: "80"
+    cpu:
+      default: "512"
+    memory:
+      default: "128"
+```
+
+This blueprint expects ESC environments tagged with `esc` and `ecs`. Now for this particular blueprint you have to
+create an environment with the `imports:` statement and including the environment with the cloud tag `esc:tag: aws`. And
+then exporting the outputs of the `aws` environment. The environment looks like this:
+
+```yaml
+imports:
+- pulumi-idp/aws-dev
+values:
+  stackRefs:
+    fn::open::pulumi-stacks:
+      stacks:
+        aws:
+          stack: ecs-aws-typescript/my-ecs-cluster
+  pulumiConfig:
+    clusterArn: ${stackRefs.aws.clusterArn}
+```
+
+This will import the existing ECS cluster and use it for the new workload. The `stackRefs` statement is used to
+reference to the stack which is the shared infrastructure. The `pulumiConfig` statement is used to pass the
+configuration to the blueprint. The `clusterArn` is the output of the ECS cluster and is used in the blueprint to create
+the new ECS service.
+
+This is the example for the `simple-webapp-kubernetes-deployment` blueprint. Imagine you create the workload based on the blueprint with the name 
+
+```yaml
+imports:
+- pulumi-idp/aws-dev
+values:
+  stackRefs:
+    fn::open::pulumi-stacks:
+      stacks:
+        aws:
+          stack: kubernetes-aws-typescript/my-eks-cluster-dev
+  kubeconfig: {'fn::toJSON': "${stackRefs.aws.kubeconfig}"}
+  pulumiConfig:
+    kubernetes:kubeconfig: ${kubeconfig}
+  files:
+    KUBECONFIG: ${kubeconfig}
+```
+
+This will export the kubeconfig of the shared EKS cluster and use it for the new workload.
+
 ### Local Deployment via Docker Compose
 
 - Clone the repository
@@ -67,7 +214,7 @@ provider.
     PULUMI_BLUEPRINT_GITHUB_LOCATION=dirien/blueprints
     PULUMI_WORKLOAD_DEFINITION_LOCATION=pulumi-idp/dev
     ```
-- Create a `.env` file in the root with the following contents:
+- Create a `.env.docker-compose` file in the root with the following contents:
     ```bash
     MODE=production
     VITE_API_URL=/
