@@ -16,6 +16,9 @@ type Stack = {
     resourceCount: number;
     result: string;
     deploymentId: string;
+    outputs: {
+        [key: string]: string | undefined;
+    }
     tags?: {
         "idp:projectid"?: string;
         "idp:workload"?: string;
@@ -353,6 +356,50 @@ export default function WorkloadDetail() {
                                         </div>
                                         <div
                                             className="text-sm text-gray-900 dark:text-white">{workloadDetails.stack?.tags?.["idp:stage"] || "N/A"}</div>
+                                    </div>
+                                    <div className="bg-gray-50 dark:bg-gray-700 p-4 ">
+                                        <div
+                                            className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Outputs
+                                        </div>
+                                        <div className="text-sm text-gray-900 dark:text-white">
+                                            {workloadDetails.stack?.outputs ? (
+                                                <div>
+                                                    {Object.entries(workloadDetails.stack.outputs).map(([key, value]) => {
+                                                        // Function to check if a value is a valid URL
+                                                        const isValidUrl = (string) => {
+                                                            try {
+                                                                const url = new URL(string);
+                                                                return url.protocol === 'http:' || url.protocol === 'https:';
+                                                            } catch {
+                                                                return false;
+                                                            }
+                                                        };
+
+                                                        return (
+                                                            <div key={key} className="mb-1">
+                                                                <strong>{key}:</strong>{' '}
+                                                                {isValidUrl(value) ? (
+                                                                    <a
+                                                                        href={value}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline"
+                                                                    >
+                                                                        {value}
+                                                                    </a>
+                                                                ) : (
+                                                                    value
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            ) : (
+                                                <p className="text-gray-500 dark:text-gray-400 text-sm">
+                                                    No outputs available.
+                                                </p>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>

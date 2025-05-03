@@ -1,73 +1,127 @@
-# Pulumi Internal Developer Portal
+# Pulumi DIY Internal Developer Portal
 
-This is the Pulumi reference architecture for building an internal developer portal using the Pulumi platform and APIs.
-The goal of this project is to provide a reference implementation of an internal developer portal that can be used as a
-starting point for building your own internal developer portal using Pulumi as the underlying infrastructure as code
-provider.
+![Pulumi DIY IDP](img.png)
 
-## Getting Started
+A **reference architecture** that turns Pulumi into your team’s self‑service power tool. Clone it, tweak it, and ship an **Internal Developer Portal (IDP)** that lets engineers spin up production‑ready infrastructure in minutes—all governed by your Pulumi program, policy, and best practices.
 
-### Prerequisites
+## 🌟 What’s inside?
 
-- [Pulumi](https://pulumi.com/docs/get-started/install/) installed
-- [Node.js](https://nodejs.org/en/download/) installed
-- [Go](https://golang.org/dl/) installed
-- [Docker](https://www.docker.com/get-started) installed
-- [GitHub OAuth App](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app) created
+| Capability                                                                   | Why it matters                                                                                                                                                                                              |
+|------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Pulumi Cloud & [ESC](https://www.pulumi.com/product/secrets-management/)** | Centrally manage configs, secrets, and stack references—no more wiki pages of copy/paste variables.                                                                                                         |
+| **Blueprint‑driven Workloads**                                               | Ship new services from [golden paths](https://cloud.google.com/blog/products/application-development/golden-paths-for-engineering-execution-consistency) (ECS, EKS, Web Apps, and more) with **one click**. |
+| **GitHub OAuth SSO**                                                         | Secure login that maps GitHub teams straight onto your portal’s RBAC model.                                                                                                                                 |
+| **Docker‑Compose or AWS ECS** deploy\*\*                                     | Try it locally first, then promote to production with the *same* code.                                                                                                                                      |
 
-### Create GitHub OAuth App
 
-- Go to your GitHub account and create a new OAuth app.
-- Set the following values for local development or docker-compose:
-    - **Homepage URL**: `http://localhost:8080`
-    - **Authorization callback URL**: `http://localhost:8080/callback`
-- Set the following values for production:
-    - **Homepage URL**: `https://<your_domain_name>`
-    - **Authorization callback URL**: `https://<your_domain_name>/callback`
-- Get the `Client ID` and `Client Secret` from the OAuth app and set them in your environment variables.
+## ⚡ Quick start (local)
 
-### Setup in Pulumi Cloud
+```bash
+# 1. Clone & switch into the repo
+$ git clone https://github.com/your‑org/pulumi-idp.git && cd pulumi-idp
 
-#### Workload Definition Fields
+# 2. Fill in GitHub and Pulumi creds (see **Prerequisites** below)
+$ cp backend/.env.example backend/.env
 
-- Create in your Pulumi Cloud console a new environment project called `pulumi-idp` and the environment called `dev`
-  with following
-  content:
-  ```yaml
-    values:
-      workload:
-        properties:
-          - name: name
-            type: string
-            title: Workload Name
-          - name: team
-            type: $ref/teams
-            title: Team
-          - name: blueprint
-            type: string
-            title: Blueprint
-          - name: projectId
-            type: $ref/projects
-            title: Project ID
-          - name: cookiecut
-            type: boolean
-            title: Cookiecut blueprint
-            required: false
-  ```
+# 3. Launch everything
+$ docker‑compose up --build --force-recreate
+```
 
-#### Prepare ESC environment
+Browse to [**http://localhost:8080**](http://localhost:8080) (portal) or [**http://localhost:8081**](http://localhost:8081) (Traefik dashboard) and start creating workloads! 🎉
 
-Have a look at the Blueprint repository for the Pulumi Blueprints that this IDP is using. The repository is located at
-https://github.com/pulumi/blueprints.
+Want the production setup? Skip down to [Production deployment with Pulumi (AWS ECS)](#-deployment-via-pulumi-aws-ecs).
 
-The anatomy of a blueprint is as follows:
 
-```Pulumi.yaml
+## 📋 Table of contents
+
+1. [Overview](#-overview)
+  1. [What is an Internal Developer Portal (IDP)?](#what-is-an-internal-developer-portal-idp)
+  2. [What is a Blueprint?](#what-is-a-blueprint)
+  3. [What is Workload?](#what-is-workload)
+1. [Prerequisites](#-prerequisites)
+2. [Create the GitHub OAuth App](#-create-github-oauth-app)
+3. [Pulumi Cloud setup](#-setup-in-pulumi-cloud)
+  1. [Workload definition fields](#workload-definition-fields)
+  2. [ESC environments & blueprints](#prepare-esc-environment)
+4. [Local deployment with Docker Compose](#-local-deployment-via-docker-compose)
+5. [Production deployment with Pulumi (AWS ECS)](#-deployment-via-pulumi-aws-ecs)
+
+## 👨‍🏫 Overview
+
+### What is an Internal Developer Portal (IDP)?
+
+An **Internal Developer Portal (IDP)** is a self-service platform that allows developers to create, manage, and deploy workloads in a consistent and secure manner. It provides a user-friendly interface for developers to interact with the underlying infrastructure and services.
+
+### What is a Blueprint?
+
+A **blueprint** is a reusable, parameterized Pulumi program that defines a workload. It’s the **golden path** for your team to create workloads consistently. Normally, **blueprints** are created by the platform engineering team, but they can also be created by developers.
+
+### What is Workload?
+
+A **workload** is a concrete instance of a blueprint. It’s the actual Pulumi stack that gets deployed to your cloud provider. Workloads are created by developers using the portal and depending on the needs it could be completely created with a no-code. 
+
+## 🛠 Prerequisites
+
+Make sure the following tools (and accounts) are ready to roll:
+
+* [Pulumi CLI](https://pulumi.com/docs/get-started/install/) v3+
+* [Node.js](https://nodejs.org/en/download/) (LTS)
+* [Go](https://golang.org/dl/) 1.22+
+* [Docker](https://www.docker.com/get-started)
+* A **GitHub OAuth App** (we’ll configure it next)
+
+
+## 🔑 Create GitHub OAuth App
+
+1. In your GitHub **Settings → Developer settings → OAuth Apps**, click **New OAuth App**.
+2. Use these settings **for *****local***** dev / Docker‑Compose**:
+
+  * **Homepage URL**: `http://localhost:8080`
+  * **Authorization callback URL**: `http://localhost:8080/callback`
+3. Use these settings **for production** (replace `<your_domain_name>`):
+
+  * **Homepage URL**: `https://<your_domain_name>`
+  * **Authorization callback URL**: `https://<your_domain_name>/callback`
+4. Copy the **Client ID** and **Client Secret**—you’ll use them in upcoming `.env` files and Pulumi configs.
+
+
+## 🏗 Setup in Pulumi Cloud
+
+### Workload definition fields
+
+Create a **Pulumi Environment Project** named `pulumi-idp`, then an **Environment** called `dev` with this YAML:
+
+```yaml
+values:
+  workload:
+    properties:
+      - name: name
+        type: string
+        title: Workload Name
+      - name: team
+        type: $ref/teams
+        title: Team
+      - name: blueprint
+        type: string
+        title: Blueprint
+      - name: projectId
+        type: $ref/projects
+        title: Project ID
+      - name: cookiecut
+        type: boolean
+        title: Cookiecut blueprint
+        required: false
+```
+
+### Prepare ESC environment
+
+All blueprints live in [`pulumi/blueprints`](https://github.com/pulumi/blueprints). Each blueprint advertises the **cloud provider** it needs via the `esc:tag` label so the portal can surface the right stages.
+
+```yaml
 name: ecs-aws-typescript
 author: Platform engineering team
 description: |
   An Amazon Elastic Container Service (ECS) on AWS using Pulumi:
-  
   * Creates an ECS Cluster
 
 runtime:
@@ -85,38 +139,66 @@ config:
       idp:blueprintVersion: 0.2.0
   esc:tag: aws
 
-
 template:
   displayName: Elastic Container Service (ECS) on AWS
   description: |
     An Amazon Elastic Container Service (ECS) on AWS using Pulumi:
-    
     * Creates an ECS Cluster
-
   config:
     aws:region:
       default: eu-central-1
 ```
 
-The `template` tag is standard Pulumi templating, but interesting is the `esc:tag` tag. This tags fetches all the ESC
-environments that are tagged with the key `esc` and a value. Here it is `aws`. This is the tag that is used to filter
-and display the stages in the Create Workload form. This is important for blueprints creating infrastructure in the
-cloud.
+#### Prepare the ESC environments for shared infrastructure
 
-This will automatically create a new environment in the Pulumi Cloud console with the project name `esc-aws-typescript`
-and the workload name as the environment name.
+As a platform engineering team, you need to set up the **Pulumi ESC** environment for shared infrastructure. The shared infrastructure will be deployed also using our IDP and one of the blueprints.
 
-If you want to provide a stage for blueprint which uses this existing infrastructure, created by the IDP, you have to
-create another environment. For example the blueprints `simple-webapp-ecs-aws-typescript` and
-`simple-webapp-kubernetes-deployment`. Let's have a look at the `simple-webapp-ecs-aws-typescript` blueprint
-which is located in the Pulumi Blueprints repository. The `Pulumi.yaml` file looks like this:
+That your developers can create workloads, you need to set up the **Pulumi ESC** environment beforehand. This is a one-time setup with all the variables and secrets needed to deploy the workloads. At a minimum, you need to set up the following:
+
+```yaml
+values:
+  environmentVariables:
+    AWS_ACCESS_KEY_ID: ${aws.creds.accessKeyId}
+    AWS_SECRET_ACCESS_KEY: ${aws.creds.secretAccessKey}
+    AWS_SESSION_TOKEN: ${aws.creds.sessionToken}
+    AWS_REGION: ${aws.region}
+  aws:
+    region: eu-central-1
+    creds:
+      fn::open::aws-login:
+        oidc:
+          roleArn: arn:aws:iam::<your_aws_account_id>:role/<your_aws_role>
+          sessionName: pulumi-environments-session
+          duration: 1h
+```
+
+This will provide the necessary AWS credentials to deploy the workloads. You can also set up other environment variables as needed. Name the environment `pulumi-idp/aws-dev`. Tag the environment with the tag label `esc` and the value `aws` to make it available for the workloads. This will allow the portal to use this environment when deploying the workloads.
+
+Now you need to set up the Pulumi ESC environment for the shared infrastructure you created, which exposes the `clusterArn` to the workloads. This is done by creating a new environment with the following YAML:
+
+```yaml
+imports:
+- pulumi-idp/aws-dev
+values:
+  stackRefs:
+    fn::open::pulumi-stacks:
+      stacks:
+        aws:
+          stack: ecs-aws-typescript/my-ecs-cluster
+  pulumiConfig:
+    clusterArn: ${stackRefs.aws.clusterArn}
+```
+
+Tag the environment with the tag label `esc` and the value `ecs` to make it available for the workloads. Name the environment `pulumi-idp/ecs-dev`. This will allow the portal to use this environment when deploying the workloads.
+
+Now let's have a look at a `bluerpint` that deploys a workload on the shared infrastructure, we just created in the steps above:
 
 ```yaml
 name: simple-webapp-ecs-aws-typescript
 author: Platform engineering team
 description: |
   A simple web application running on AWS Elastic Container Service (ECS) using Pulumi:
-
+  
   * Creates an Load Balancer
   * Creates an ECS Service
   * Creates an ECS Task Definition
@@ -140,7 +222,7 @@ template:
   displayName: Simple Webapp ECS AWS Deployment
   description: |
     A simple web application running on AWS Elastic Container Service (ECS) using Pulumi:
-
+    
     * Creates an Load Balancer
     * Creates an ECS Service
     * Creates an ECS Task Definition
@@ -158,113 +240,94 @@ template:
       default: "128"
 ```
 
-This blueprint expects ESC environments tagged with `esc` and `ecs`. Now for this particular blueprint you have to
-create an environment with the `imports:` statement and including the environment with the cloud tag `esc:tag: aws`. And
-then exporting the outputs of the `aws` environment. The environment looks like this:
+Here we can see that we are using the `esc:tag` label to tag the blueprint with the value `ecs`. This will make it available for the workloads that are deployed on the shared infrastructure and uses the `pulumi-idp/ecs-dev` environment.
 
-```yaml
-imports:
-- pulumi-idp/aws-dev
-values:
-  stackRefs:
-    fn::open::pulumi-stacks:
-      stacks:
-        aws:
-          stack: ecs-aws-typescript/my-ecs-cluster
-  pulumiConfig:
-    clusterArn: ${stackRefs.aws.clusterArn}
+Same pattern works for EKS workloads that need a `kubeconfig`. 🤝
+
+Once setup this upfront work, your developers can create workloads using the portal and the shared infrastructure will be used automatically.
+
+> The next version of this IDP will take care to show only blueprints that are allowed to be used depending on the group the user belongs to. This information will be read out from a directory like Azure Entra or AWS Cognito.
+
+## 🐳 Local Deployment via Docker Compose
+
+1. **Clone** the repository.
+
+2. In `backend/`, create a `.env` file containing ⬇️:
+
+   ```bash
+   GITHUB_CLIENT_ID=<your_github_client_id>
+   GITHUB_CLIENT_SECRET=<your_github_client_secret>
+   GITHUB_TOKEN=<your_github_token>
+   PULUMI_ACCESS_TOKEN=<your_pulumi_access_token>
+   PULUMI_ORGANIZATION=<your_pulumi_organization>
+   PULUMI_BASE_URL=https://api.pulumi.com/api
+   PULUMI_BLUEPRINT_GITHUB_LOCATION=dirien/blueprints
+   PULUMI_WORKLOAD_DEFINITION_LOCATION=pulumi-idp/dev
+   ```
+
+3. At repo root, create `.env.docker-compose` (front‑end env vars):
+
+   ```bash
+   MODE=production
+   VITE_API_URL=/
+   VITE_GITHUB_AUTH_URL=https://github.com/login/oauth/authorize
+   VITE_GITHUB_CLIENT_ID=<your_github_client_id>
+   VITE_GITHUB_TOKEN_ENDPOINT=/api/github/token
+   VITE_GITHUB_USER_API=https://api.github.com/user
+   VITE_GITHUB_SCOPE=read:user user:email
+   VITE_GITHUB_ORG_NAME=<your_github_org_name>
+   ```
+
+4. **Run** the stack:
+
+```bash
+docker-compose up --build --force-recreate
 ```
 
-This will import the existing ECS cluster and use it for the new workload. The `stackRefs` statement is used to
-reference to the stack which is the shared infrastructure. The `pulumiConfig` statement is used to pass the
-configuration to the blueprint. The `clusterArn` is the output of the ECS cluster and is used in the blueprint to create
-the new ECS service.
+5. Open [**http://localhost:8080**](http://localhost:8080) (IDP) or [**http://localhost:8081**](http://localhost:8081) (Traefik) to explore.
 
-This is the example for the `simple-webapp-kubernetes-deployment` blueprint. Imagine you create the workload based on the blueprint with the name 
 
-```yaml
-imports:
-- pulumi-idp/aws-dev
-values:
-  stackRefs:
-    fn::open::pulumi-stacks:
-      stacks:
-        aws:
-          stack: kubernetes-aws-typescript/my-eks-cluster-dev
-  kubeconfig: {'fn::toJSON': "${stackRefs.aws.kubeconfig}"}
-  pulumiConfig:
-    kubernetes:kubeconfig: ${kubeconfig}
-  files:
-    KUBECONFIG: ${kubeconfig}
-```
+## 🚀 Deployment via Pulumi (AWS ECS)
 
-This will export the kubeconfig of the shared EKS cluster and use it for the new workload.
+1. `cd deploy`
 
-### Local Deployment via Docker Compose
+2. In Pulumi Cloud, under your org, create **Environment** `pulumi-idp/deploy` with the following YAML:
 
-- Clone the repository
-- Create a `.env` file in the `backend` directory with the following contents:
-    ```bash
-    GITHUB_CLIENT_ID=<your_github_client_id>
-    GITHUB_CLIENT_SECRET=<your_github_client_secret>
-    GITHUB_TOKEN=<your_github_token>
-    PULUMI_ACCESS_TOKEN=<your_pulumi_access_token>
-    PULUMI_ORGANIZATION=<your_pulumi_organization>
-    PULUMI_BASE_URL=https://api.pulumi.com/api
-    PULUMI_BLUEPRINT_GITHUB_LOCATION=dirien/blueprints
-    PULUMI_WORKLOAD_DEFINITION_LOCATION=pulumi-idp/dev
-    ```
-- Create a `.env.docker-compose` file in the root with the following contents:
-    ```bash
-    MODE=production
-    VITE_API_URL=/
-    VITE_GITHUB_AUTH_URL=https://github.com/login/oauth/authorize
-    VITE_GITHUB_CLIENT_ID=<your_github_client_id>
-    VITE_GITHUB_TOKEN_ENDPOINT=/api/github/token
-    VITE_GITHUB_USER_API=https://api.github.com/user
-    VITE_GITHUB_SCOPE=read:user user:email
-    VITE_GITHUB_ORG_NAME=<your_github_org_name>
-    ```
+   ```yaml
+   values:
+     pulumiConfig:
+       GITHUB_CLIENT_ID: <your_github_client_id>
+       GITHUB_CLIENT_SECRET: <your_github_client_secret>
+       GITHUB_TOKEN: <your_github_token>
+       PULUMI_ACCESS_TOKEN: <your_pulumi_access_token>
+       PULUMI_ORGANIZATION: <your_pulumi_organization>
+       PULUMI_BASE_URL: https://api.pulumi.com/api
+       PULUMI_BLUEPRINT_GITHUB_LOCATION: pulumi/blueprints
+       PULUMI_WORKLOAD_DEFINITION_LOCATION: pulumi-idp/dev
+       MODE: production
+       VITE_API_URL: /
+       VITE_GITHUB_AUTH_URL: https://github.com/login/oauth/authorize
+       VITE_GITHUB_CLIENT_ID: <your_github_client_id>
+       VITE_GITHUB_TOKEN_ENDPOINT: /api/github/token
+       VITE_GITHUB_USER_API: https://api.github.com/user
+       VITE_GITHUB_SCOPE: read:user user:email
+       VITE_GITHUB_ORG_NAME: <your_github_org_name of the oauth app>
+   ```
 
-- Run the following command to deploy the application:
-    ```bash
-    docker-compose up --build --force-recreate
-    ```
+3. Authenticate to AWS (e.g., `aws sso login` or env vars).
 
-- Open your browser and navigate to `http://localhost:8080` to view the application or `http://localhost:8081` to view
-  the Traefik dashboard.
+4. Deploy!
 
-### Deployment via Pulumi
+   ```bash
+   pulumi up
+   ```
 
-- Head over to the `deploy` folder.
-- The Pulumi program is designed to run in `AWS` and uses `ECS` to deploy the application. The program is written in
-  `Typescript` and uses the several different Pulumi packages to create the necessary resources.
-    - Create in your Pulumi Cloud console under your organization a new environment called `pulumi-idp/deploy` to store
-      all
-      the environment variables and secrets.
-      ```yaml
-      values:
-        pulumiConfig:
-          GITHUB_CLIENT_ID: <your_github_client_id>
-          GITHUB_CLIENT_SECRET: <your_github_client_secret>
-          GITHUB_TOKEN: <your_github_token>
-          PULUMI_ACCESS_TOKEN: <your_pulumi_access_token>
-          PULUMI_ORGANIZATION: <your_pulumi_organization>
-          PULUMI_BASE_URL: https://api.pulumi.com/api
-          PULUMI_BLUEPRINT_GITHUB_LOCATION: pulumi/blueprints
-          PULUMI_WORKLOAD_DEFINITION_LOCATION: pulumi-idp/dev
-          MODE: production
-          VITE_API_URL: /
-          VITE_GITHUB_AUTH_URL: https://github.com/login/oauth/authorize
-          VITE_GITHUB_CLIENT_ID: <your_github_client_id>
-          VITE_GITHUB_TOKEN_ENDPOINT: /api/github/token
-          VITE_GITHUB_USER_API: https://api.github.com/user
-          VITE_GITHUB_SCOPE: read:user user:email
-          VITE_GITHUB_ORG_NAME: <your_github_org_name of the oauth app>
-      ```
-- Authenticate against AWS.
-- Run the following command to deploy the application:
-    ```bash
-    pulumi up
-    ```
-- Open your browser and navigate to the URL of the load balancer created by Pulumi to view the application.
+5. Grab the load balancer URL from the Pulumi outputs, open it in your browser, and enjoy your production‑grade IDP. 🏁
+
+## 🙌 Contributing
+
+Found an issue? Want to ship a new blueprint? PRs are welcome—just follow the [contribution guidelines](CONTRIBUTING.md).
+
+## 📄 License
+
+Apache 2.0 © Pulumi Corp.

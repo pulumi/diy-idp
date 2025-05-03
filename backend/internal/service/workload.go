@@ -509,6 +509,15 @@ func (s *WorkloadService) GetWorkloadDetails(organization, project, stack string
 			return nil, err
 		}
 
+		stackResources, err := s.pulumiService.GetLatestStackResources(s.cfg.Pulumi.Organization, stacks.Stacks[i].ProjectName, stacks.Stacks[i].StackName)
+		if err != nil {
+			return nil, err
+		}
+		if len(stackResources.Resources) > 0 {
+			if stackResources.Resources[0].Resource.Type == "pulumi:pulumi:Stack" {
+				stacks.Stacks[i].Outputs = stackResources.Resources[0].Resource.Outputs
+			}
+		}
 		stacks.Stacks[i].Tags = stackHandler.Tags
 	}
 
