@@ -1,9 +1,6 @@
 # Pulumi Internal Developer Portal
 
-This is the Pulumi reference architecture for building an internal developer portal using the Pulumi platform and APIs.
-The goal of this project is to provide a reference implementation of an internal developer portal that can be used as a
-starting point for building your own internal developer portal using Pulumi as the underlying infrastructure as code
-provider.
+This is the Pulumi reference architecture for building an internal developer portal using the Pulumi platform and APIs. The goal of this project is to provide a reference implementation of an internal developer portal that can be used as a starting point for building your own internal developer portal using Pulumi as the underlying infrastructure-as-code provider.
 
 ## Getting Started
 
@@ -30,9 +27,7 @@ provider.
 
 #### Workload Definition Fields
 
-- Create in your Pulumi Cloud console a new environment project called `pulumi-idp` and the environment called `dev`
-  with following
-  content:
+- Create in your Pulumi Cloud console a new environment project called `pulumi-idp` and the environment called `dev` with the following content:
   ```yaml
     values:
       workload:
@@ -57,12 +52,11 @@ provider.
 
 #### Prepare ESC environment
 
-Have a look at the Blueprint repository for the Pulumi Blueprints that this IDP is using. The repository is located at
-https://github.com/pulumi/blueprints.
+Have a look at the Blueprint repository for the Pulumi Blueprints that this IDP is using. The repository is located at https://github.com/pulumi/blueprints.
 
 The anatomy of a blueprint is as follows:
 
-```Pulumi.yaml
+```yaml
 name: ecs-aws-typescript
 author: Platform engineering team
 description: |
@@ -85,7 +79,6 @@ config:
       idp:blueprintVersion: 0.2.0
   esc:tag: aws
 
-
 template:
   displayName: Elastic Container Service (ECS) on AWS
   description: |
@@ -98,18 +91,11 @@ template:
       default: eu-central-1
 ```
 
-The `template` tag is standard Pulumi templating, but interesting is the `esc:tag` tag. This tags fetches all the ESC
-environments that are tagged with the key `esc` and a value. Here it is `aws`. This is the tag that is used to filter
-and display the stages in the Create Workload form. This is important for blueprints creating infrastructure in the
-cloud.
+The `template` tag is standard Pulumi templating, but interesting is the `esc:tag` tag. This tag fetches all the ESC environments that are tagged with the key `esc` and a value. Here it is `aws`. This is the tag used to filter and display the stages in the Create Workload form. This is important for blueprints creating infrastructure in the cloud.
 
-This will automatically create a new environment in the Pulumi Cloud console with the project name `esc-aws-typescript`
-and the workload name as the environment name.
+This will automatically create a new environment in the Pulumi Cloud console with the project name `ecs-aws-typescript` and the workload name as the environment name.
 
-If you want to provide a stage for blueprint which uses this existing infrastructure, created by the IDP, you have to
-create another environment. For example the blueprints `simple-webapp-ecs-aws-typescript` and
-`simple-webapp-kubernetes-deployment`. Let's have a look at the `simple-webapp-ecs-aws-typescript` blueprint
-which is located in the Pulumi Blueprints repository. The `Pulumi.yaml` file looks like this:
+If you want to provide a stage for a blueprint which uses this existing infrastructure, created by the IDP, you have to create another environment. For example, the blueprints `simple-webapp-ecs-aws-typescript` and`simple-webapp-kubernetes-deployment`. Let's have a look at the `simple-webapp-ecs-aws-typescript` blueprint which is located in the Pulumi Blueprints repository. The `Pulumi.yaml` file looks like this:
 
 ```yaml
 name: simple-webapp-ecs-aws-typescript
@@ -158,9 +144,7 @@ template:
       default: "128"
 ```
 
-This blueprint expects ESC environments tagged with `esc` and `ecs`. Now for this particular blueprint you have to
-create an environment with the `imports:` statement and including the environment with the cloud tag `esc:tag: aws`. And
-then exporting the outputs of the `aws` environment. The environment looks like this:
+This blueprint expects ESC environments tagged with `esc` and `ecs`. Now for this particular blueprint you have to create an environment with the `imports:` statement and include the environment with the cloud tag `esc:tag: aws`. And then export the outputs of the `aws` environment. The environment looks like this:
 
 ```yaml
 imports:
@@ -175,12 +159,9 @@ values:
     clusterArn: ${stackRefs.aws.clusterArn}
 ```
 
-This will import the existing ECS cluster and use it for the new workload. The `stackRefs` statement is used to
-reference to the stack which is the shared infrastructure. The `pulumiConfig` statement is used to pass the
-configuration to the blueprint. The `clusterArn` is the output of the ECS cluster and is used in the blueprint to create
-the new ECS service.
+This will import the existing ECS cluster and use it for the new workload. The `stackRefs` statement is used to reference the stack which is the shared infrastructure. The `pulumiConfig` statement is used to pass the configuration to the blueprint. The `clusterArn` is the output of the ECS cluster and is used in the blueprint to create the new ECS service.
 
-This is the example for the `simple-webapp-kubernetes-deployment` blueprint. Imagine you create the workload based on the blueprint with the name 
+This is the example for the `simple-webapp-kubernetes-deployment` blueprint. Imagine you create the workload based on the blueprint with the name:
 
 ```yaml
 imports:
@@ -237,11 +218,8 @@ This will export the kubeconfig of the shared EKS cluster and use it for the new
 ### Deployment via Pulumi
 
 - Head over to the `deploy` folder.
-- The Pulumi program is designed to run in `AWS` and uses `ECS` to deploy the application. The program is written in
-  `Typescript` and uses the several different Pulumi packages to create the necessary resources.
-    - Create in your Pulumi Cloud console under your organization a new environment called `pulumi-idp/deploy` to store
-      all
-      the environment variables and secrets.
+- The Pulumi program is designed to run on `AWS` and uses `ECS` to deploy the application. The program is written in `TypeScript` and uses several different Pulumi packages to create the necessary resources.
+    - Create in your Pulumi Cloud console under your organization a new environment called `pulumi-idp/deploy` to store all the environment variables and secrets.
       ```yaml
       values:
         pulumiConfig:
