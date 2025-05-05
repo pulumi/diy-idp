@@ -53,7 +53,7 @@ func (s *PulumiService) SetStackTag(organization, project, stack string, tag mod
 
 	req.Header.Set("Accept", s.cfg.Pulumi.APIVersion)
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "token "+s.cfg.Pulumi.APIToken)
+	req.Header.Set("Authorization", fmt.Sprintf("token %s", s.cfg.Pulumi.APIToken))
 
 	resp, err := s.httpClient.Do(req)
 	if err != nil {
@@ -88,7 +88,7 @@ func (s *PulumiService) CreateStack(organization, project, stackName string) (*m
 
 	req.Header.Set("Accept", s.cfg.Pulumi.APIVersion)
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "token "+s.cfg.Pulumi.APIToken)
+	req.Header.Set("Authorization", fmt.Sprintf("token %s", s.cfg.Pulumi.APIToken))
 
 	resp, err := s.httpClient.Do(req)
 	if err != nil {
@@ -111,7 +111,6 @@ func (s *PulumiService) CreateStack(organization, project, stackName string) (*m
 
 // DeleteStack deletes a stack
 func (s *PulumiService) DeleteStack(organization, project, stack string) error {
-	// Check if we have all required path parameters
 	if organization == "" || project == "" || stack == "" {
 		return fmt.Errorf("organization, project, and stack are required")
 	}
@@ -123,10 +122,9 @@ func (s *PulumiService) DeleteStack(organization, project, stack string) error {
 		return fmt.Errorf("error creating request: %w", err)
 	}
 
-	// Add the necessary headers
 	req.Header.Set("Accept", s.cfg.Pulumi.APIVersion)
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "token "+s.cfg.Pulumi.APIToken)
+	req.Header.Set("Authorization", fmt.Sprintf("token %s", s.cfg.Pulumi.APIToken))
 
 	resp, err := s.httpClient.Do(req)
 	if err != nil {
@@ -140,6 +138,39 @@ func (s *PulumiService) DeleteStack(organization, project, stack string) error {
 	}
 
 	return nil
+}
+
+// GetLatestStackResources retrieves the latest stack resources
+func (s *PulumiService) GetLatestStackResources(organization, project, stack string) (*model.StackResourcesResponse, error) {
+	url := fmt.Sprintf("%s/stacks/%s/%s/%s/resources/latest",
+		s.cfg.Pulumi.APIBaseURL, organization, project, stack)
+
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("Accept", "application/vnd.pulumi+8")
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("token %s", s.cfg.Pulumi.APIToken))
+
+	resp, err := s.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to send request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, string(body))
+	}
+
+	var stackResources model.StackResourcesResponse
+	if err := json.NewDecoder(resp.Body).Decode(&stackResources); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	return &stackResources, nil
 }
 
 // GetStack retrieves a stack
@@ -218,7 +249,7 @@ func (s *PulumiService) ListStacks(options *model.ListStacksOptions) (*model.Lis
 	// Add the necessary headers
 	req.Header.Set("Accept", s.cfg.Pulumi.APIVersion)
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "token "+s.cfg.Pulumi.APIToken)
+	req.Header.Set("Authorization", fmt.Sprintf("token %s", s.cfg.Pulumi.APIToken))
 
 	// Execute the request
 	resp, err := s.httpClient.Do(req)

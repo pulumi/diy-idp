@@ -203,7 +203,7 @@ export default function ListWorkloads() {
                 </button>
                 {/* Delete Confirmation Modal */}
                 {showDeleteConfirm && (
-                    <div className="fixed z-10 inset-0 overflow-y-auto">
+                    <div className="fixed z-50 inset-0 overflow-y-auto">
                         <div
                             className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                             <div className="fixed inset-0 transition-opacity" aria-hidden="true">
@@ -212,7 +212,7 @@ export default function ListWorkloads() {
                             <span className="hidden sm:inline-block sm:align-middle sm:h-screen"
                                   aria-hidden="true">&#8203;</span>
                             <div
-                                className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                                className="relative inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full z-50">
                                 <div className="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                                     <div className="sm:flex sm:items-start">
                                         <div

@@ -37,17 +37,18 @@ type ListStacksOptions struct {
 
 // Stack represents a stack in the list stacks response
 type Stack struct {
-	OrgName          string            `json:"orgName"`
-	ProjectName      string            `json:"projectName"`
-	StackName        string            `json:"stackName"`
-	LastUpdate       int64             `json:"lastUpdate"`
-	ResourceCount    int               `json:"resourceCount"`
-	Result           string            `json:"result"`
-	DeploymentId     string            `json:"deploymentId"`
-	CurrentOperation *CurrentOperation `json:"currentOperation,omitempty"`
-	ActiveUpdate     string            `json:"activeUpdate,omitempty"`
-	Tags             map[string]string `json:"tags,omitempty"`
-	Version          int               `json:"version"`
+	OrgName          string                 `json:"orgName"`
+	ProjectName      string                 `json:"projectName"`
+	StackName        string                 `json:"stackName"`
+	LastUpdate       int64                  `json:"lastUpdate"`
+	ResourceCount    int                    `json:"resourceCount"`
+	Result           string                 `json:"result"`
+	DeploymentId     string                 `json:"deploymentId"`
+	CurrentOperation *CurrentOperation      `json:"currentOperation,omitempty"`
+	ActiveUpdate     string                 `json:"activeUpdate,omitempty"`
+	Outputs          map[string]interface{} `json:"outputs,omitempty"`
+	Tags             map[string]string      `json:"tags,omitempty"`
+	Version          int                    `json:"version"`
 }
 
 // CurrentOperation represents the current operation on a stack
@@ -262,4 +263,30 @@ type StackPermission struct {
 
 type RequestBody struct {
 	AddStackPermission StackPermission `json:"addStackPermission"`
+}
+
+type StackResourcesResponse struct {
+	Resources []ResourceWrapper `json:"resources"`
+	Region    string            `json:"region"`
+	Version   int               `json:"version"`
+}
+
+// ResourceWrapper wraps a resource object
+type ResourceWrapper struct {
+	Resource Resource `json:"resource"`
+}
+
+// Resource represents a Pulumi resource
+type Resource struct {
+	ID                      string                 `json:"id,omitempty"`
+	Type                    string                 `json:"type"`
+	URN                     string                 `json:"urn"`
+	Custom                  bool                   `json:"custom"`
+	Delete                  bool                   `json:"delete"`
+	Dependencies            []string               `json:"dependencies"`
+	Outputs                 map[string]interface{} `json:"outputs,omitempty"`
+	Parent                  string                 `json:"parent,omitempty"`
+	AdditionalSecretOutputs []string               `json:"additionalSecretOutputs,omitempty"`
+	Inputs                  map[string]interface{} `json:"inputs,omitempty"`
+	ProviderInputs          map[string]interface{} `json:"providerInputs,omitempty"`
 }
